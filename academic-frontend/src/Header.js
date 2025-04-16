@@ -30,12 +30,17 @@ function Header() {
             </Link>
           </li>
           <li>
-            <Link to="/events" className="hover:text-black transition-colors duration-300 text-2xl font-bold">
-              Events
+            <Link to="/view-all-exams" className="hover:text-black transition-colors duration-300 text-2xl font-bold">
+              Exams
             </Link>
           </li>
           <li>
-            <Link to="." className="hover:text-black transition-colors duration-300 text-2xl font-bold">
+            <Link to="/view-records" className="hover:text-black transition-colors duration-300 text-2xl font-bold">
+              Lecture Rooms
+            </Link>
+          </li>
+          <li>
+            <Link to="/reports" className="hover:text-black transition-colors duration-300 text-2xl font-bold">
               Reports
             </Link>
           </li>

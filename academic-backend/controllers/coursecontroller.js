@@ -90,8 +90,6 @@ const deleteCourse = (req ,res ,next) => {
       });
 }
 
-
-
 exports.getcourses = getcourses;
 exports.addCourse = addCourse;
 exports.updateCourse = updateCourse;

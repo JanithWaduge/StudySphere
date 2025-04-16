@@ -159,6 +159,12 @@ function AdminDashboard() {
                 Add Course
               </a>
               <a
+                href="/add-Exam"
+                className="bg-orange-500 text-white py-2 px-4 rounded shadow hover:bg-orange-600 hover:text-black"
+              >
+                Add Exam
+              </a>
+              <a
                 href="/report"
                 className="bg-orange-400 text-white py-2 px-4 rounded shadow hover:bg-orange-500 ml-2 hover:text-black"
               >

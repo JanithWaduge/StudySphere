@@ -1,9 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
+
 const controller = require('./controllers/coursecontroller');
 const controller2 = require('./controllers/lecturecontroller');
 const controller3 = require('./controllers/studentController');
+const controller4 = require('./controllers/examController');
+const controller5 = require('./controllers/coursecon1');
+const router = require('./routes/lectureRoomRoutes');
 
 app.use(cors());
 
@@ -68,6 +71,69 @@ app.get('/students', (req, res) => {
         res.send();
     });
 });
+
+app.post('/createExam',(req,res) => {
+    controller4.createExam(req.body,(callack)  => {
+        res.send();
+     });
+});
+
+app.get('/view-all', (req, res) => {
+    controller4.viewAllExams(req, res, next => {
+        res.send();
+    });
+});
+
+app.get('/view/:id', (req, res) => {
+    controller4.viewOneExam(req, res, next => {
+        res.send();
+    });
+});
+
+app.get('/student-exams/:id', (req, res) => {
+    controller4.viewAllExamsForStudent(req, res, next => {
+        res.send();
+    });
+});
+
+app.put('/update/:id', (req, res) => {
+    controller4.rescheduleExam(req, res, next => {
+        res.send();
+    });
+});
+
+app.delete('/delete', (req, res) => {    
+    controller4.deleteExam(req, res, next => {
+        res.send();
+    });
+});
+
+app.get('/all', (req, res) => {
+    controller5.getcourses1(req, res, next => {
+        res.send();
+    });
+});
+
+app.get('/lecture-rooms', (req, res) => {
+    controller5.getLectureRooms(req, res, next => {        
+        res.send();        
+    });
+});
+
+
+
+// 404 - Not Found Middleware
+app.use((req, res) => {
+    res.status(404).json({ message: 'Endpoint not found' });
+});
+
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error("🔥 Server Error: ", err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
+});
+
+
 
 
 module.exports = app;

@@ -35,16 +35,16 @@ const registerStudent = async (req, res) => {
 
 
 // get all students
-const viewAllStudents = async (req, res) => {
+const getAllStudents = async (req, res) => {
 
     try {
-        const allStudnets = await studentModel.find();
+        const allStudents = await studentModel.find();
 
-        if (!allStudnets) {
+        if (!allStudents) {
             return res.status(404).json({ message: "No students are available." });
         }
 
-        res.status(200).json({ message: "Students :", allStudnets });
+        res.status(200).json({ message: "Students :", allStudents });
 
     } catch (err) {
         console.log(err);
@@ -173,4 +173,4 @@ const loginStudent = async (req, res) => {
     }
 }
 
-module.exports = { registerStudent, viewAllStudents, viewOneStudent, updateStudent, updateStudentPassword, deleteStudent, loginStudent };
+module.exports = { registerStudent, getAllStudents, viewOneStudent, updateStudent, updateStudentPassword, deleteStudent, loginStudent };

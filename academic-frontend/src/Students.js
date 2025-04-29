@@ -7,7 +7,7 @@ const Students = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+//hh
   useEffect(() => {
     Axios.get("http://localhost:5000/api/students")
       .then((res) => {

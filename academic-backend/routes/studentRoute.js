@@ -1,11 +1,13 @@
-const { registerStudent, getAllStudents, viewOneStudent, updateStudent,updateStudentPassword, deleteStudent, loginStudent } = require('../controllers/studentController');
-const express = require('express');
+const { registerStudent, viewAllStudents, viewOneStudent, updateStudent,updateStudentPassword, deleteStudent, loginStudent } = require('../controllers/studentController');
 
+const express = require('express');
 const router = express.Router();
+
+const verifyToken = require('../middleware/authorization.js');
 
 router.post('/register', registerStudent);
 
-router.get('/students', getAllStudents);
+router.get('/view-all', viewAllStudents);
 
 router.get('/view/:id', viewOneStudent);
 

@@ -218,7 +218,7 @@ function ViewSchedules() {
           </span>
         </h1> 
             <nav className="text-sm text-gray-600">
-              <a href="/admin/dashboard" className="hover:text-orange-600">Home</a>  <span>Schedules</span>
+              <a href="/admin/dashboard" className="hover:text-orange-600">Dashboard</a>  <span>Schedules</span>
             </nav>
           </div>
           <div className="flex space-x-4">

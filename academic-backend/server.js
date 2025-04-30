@@ -17,7 +17,7 @@ const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 
 const studentRoutes = require('./routes/studentRoute');
-const examRoutes = require('./routes/examroute');
+const examRoutes = require('./routes/examrouter');
 const enrollmentRoutes = require('./routes/enrollmentRoute');
 const courseRoutes = require('./routes/courserouter');
 
@@ -50,10 +50,10 @@ app.use('/api',router);
 app.use('/api',router2);
 app.use('/api',router5);
 
-app.use('/student/', studentRoutes);
-app.use('/exam/', examRoutes);
-app.use('/enrollment/', enrollmentRoutes);
-app.use('/course/', courseRoutes);
+app.use('/student', studentRoutes);
+app.use('/exam', examRoutes);
+app.use('/enrollment', enrollmentRoutes);
+app.use('/course', courseRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);

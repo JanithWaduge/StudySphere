@@ -253,7 +253,7 @@ function ViewRecords() {
           </span>
         </h1> 
             <nav className="text-sm text-gray-600">
-              <Link to="/" className="hover:text-orange-600">Home</Link>  <span>Lecture Rooms</span>
+              <Link to="/admin/dashboard" className="hover:text-orange-600">Dashboard</Link>  <span>Lecture Rooms</span>
             </nav>
           </div>
           <button

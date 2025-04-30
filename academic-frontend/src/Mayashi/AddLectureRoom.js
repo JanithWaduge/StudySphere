@@ -22,8 +22,7 @@ function AddLectureRoom() {
     air_conditioning: false,
     power_outlets: '',
     condition: '',
-    department: '',
-    customDepartment: '', // For "Other" department
+    faculty: '',
     addedBy: '',
     email: '',
   });
@@ -32,8 +31,7 @@ function AddLectureRoom() {
     location: '',
     capacity: '',
     power_outlets: '',
-    department: '',
-    customDepartment: '',
+    faculty: '',
     addedBy: '',
     email: '',
     quantity: {
@@ -108,10 +106,10 @@ function AddLectureRoom() {
   };
 
   const validateLocation = (value) => {
-    if (value.length > 20) {
+    if (value.length > 40) {
       setValidationMessages((prev) => ({
         ...prev,
-        location: 'Location must not exceed 20 characters',
+        location: 'Location must not exceed 40 characters',
       }));
       return false;
     }
@@ -174,34 +172,15 @@ function AddLectureRoom() {
     return true;
   };
 
-  const validateDepartment = (value) => {
+  const validateFaculty = (value) => {
     if (!value) {
       setValidationMessages((prev) => ({
         ...prev,
-        department: 'Department is required',
+        faculty: 'Faculty is required',
       }));
       return false;
     }
-    setValidationMessages((prev) => ({ ...prev, department: '' }));
-    return true;
-  };
-
-  const validateCustomDepartment = (value) => {
-    if (value.length > 20) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        customDepartment: 'Custom department must not exceed 20 characters',
-      }));
-      return false;
-    }
-    if (!/^[a-zA-Z\s]*$/.test(value)) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        customDepartment: 'Custom department must contain only letters and spaces',
-      }));
-      return false;
-    }
-    setValidationMessages((prev) => ({ ...prev, customDepartment: '' }));
+    setValidationMessages((prev) => ({ ...prev, faculty: '' }));
     return true;
   };
 
@@ -307,13 +286,9 @@ function AddLectureRoom() {
           },
         }));
       }
-    } else if (name === 'department') {
-      if (!validateDepartment(value)) {
-        setFormData((prev) => ({ ...prev, department: '' }));
-      }
-    } else if (name === 'customDepartment') {
-      if (value && !validateCustomDepartment(value)) {
-        setFormData((prev) => ({ ...prev, customDepartment: '' }));
+    } else if (name === 'faculty') {
+      if (!validateFaculty(value)) {
+        setFormData((prev) => ({ ...prev, faculty: '' }));
       }
     } else if (name === 'addedBy') {
       if (!validateAddedBy(value)) {
@@ -337,7 +312,7 @@ function AddLectureRoom() {
       'seating_type',
       'power_outlets',
       'condition',
-      'department',
+      'faculty',
       'addedBy',
       'email',
     ];
@@ -346,11 +321,6 @@ function AddLectureRoom() {
         setAlert({ message: `${field} is required`, type: 'error' });
         return;
       }
-    }
-
-    if (formData.department === 'Other' && !formData.customDepartment) {
-      setAlert({ message: 'Custom department is required when selecting "Other"', type: 'error' });
-      return;
     }
 
     const equipmentsWithQuantity = formData.available_equipments.filter(
@@ -371,13 +341,8 @@ function AddLectureRoom() {
   };
 
   const confirmSubmission = async () => {
-    const dataToSubmit = {
-      ...formData,
-      department: formData.department === 'Other' ? formData.customDepartment : formData.department,
-    };
-
     try {
-      await axios.post('http://localhost:5000/api/lecture-rooms', dataToSubmit);
+      await axios.post('http://localhost:5000/api/lecture-rooms', formData);
       setShowConfirmation(false);
       setAlert({ message: 'Lecture room added successfully!', type: 'success' });
       setTimeout(() => navigate('/view-records'), 2000);
@@ -406,8 +371,10 @@ function AddLectureRoom() {
     >
       <div className="relative z-10 container mx-auto px-4">
         {alert && <Alert message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
-        <h1 className="text-4xl font-bold text-orange-700 text-center mb-10 drop-shadow-lg">
-          Add Lecture Room
+        <h1 className="text-4xl font-extrabold text-gray-800 text-center tracking-tight">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+            Add Rooms For Academics
+          </span>
         </h1>
         <form
           onSubmit={handleSubmit}
@@ -439,7 +406,7 @@ function AddLectureRoom() {
               onBlur={handleBlur}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
               required
-              maxLength={20}
+              maxLength={40}
               placeholder="e.g., Building A"
             />
             {validationMessages.location && (
@@ -478,15 +445,14 @@ function AddLectureRoom() {
               <option value="Auditorium">Auditorium</option>
               <option value="BYOD Lab">BYOD Lab</option>
               <option value="Conference Room">Conference Room</option>
-              
             </select>
           </div>
-          <h2 className="text-紛2xl font-semibold text-gray-800 mb-4">Resources</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Resources</h2>
           <div className="mb-6">
             <label className="block text-gray-800 font-semibold mb-2 text-lg">Available Equipment</label>
             <div className="grid grid-cols-2 gap-4">
               {['Projectors', 'Whiteboard', 'Smartboard', 'Computers', 'Podium', 'Audio System'].map((resource) => (
-                <label key={resource} className="flex items ############-center">
+                <label key={resource} className="flex items-center">
                   <input
                     type="checkbox"
                     name="available_equipments"
@@ -588,44 +554,26 @@ function AddLectureRoom() {
             </select>
           </div>
           <div className="mb-6">
-            <label className="block text-gray-800 font-semibold mb-2 text-lg">Department</label>
+            <label className="block text-gray-800 font-semibold mb-2 text-lg">Faculty</label>
             <select
-              name="department"
-              value={formData.department}
+              name="faculty"
+              value={formData.faculty}
               onChange={handleChange}
               onBlur={handleBlur}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
               required
             >
-              <option value="">Select Department</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Other">Other</option>
+              <option value="">Select Faculty</option>
+              <option value="Computing">Computing</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Science">Science</option>
+              <option value="Business">Business</option>
+              <option value="Arts">Arts</option>
             </select>
-            {validationMessages.department && (
-              <p className="text-sm text-red-600 mt-1">{validationMessages.department}</p>
+            {validationMessages.faculty && (
+              <p className="text-sm text-red-600 mt-1">{validationMessages.faculty}</p>
             )}
           </div>
-          {formData.department === 'Other' && (
-            <div className="mb-6">
-              <label className="block text-gray-800 font-semibold mb-2 text-lg">Name of the Department</label>
-              <input
-                type="text"
-                name="customDepartment"
-                value={formData.customDepartment}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
-                required
-                maxLength={20}
-              />
-              {validationMessages.customDepartment && (
-                <p className="text-sm text-red-600 mt-1">{validationMessages.customDepartment}</p>
-              )}
-            </div>
-          )}
           <div className="mb-6">
             <label className="block text-gray-800 font-semibold mb-2 text-lg">Added By (Full Name)</label>
             <input
@@ -692,7 +640,7 @@ function AddLectureRoom() {
                 <p><strong>Air Conditioning:</strong> {formData.air_conditioning ? 'Yes' : 'No'}</p>
                 <p><strong>Power Outlets:</strong> {formData.power_outlets}</p>
                 <p><strong>Condition:</strong> {formData.condition}</p>
-                <p><strong>Department:</strong> {formData.department === 'Other' ? formData.customDepartment : formData.department}</p>
+                <p><strong>Faculty:</strong> {formData.faculty}</p>
                 <p><strong>Added By:</strong> {formData.addedBy}</p>
                 <p><strong>Email:</strong> {formData.email}</p>
               </div>

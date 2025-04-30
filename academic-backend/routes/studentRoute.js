@@ -3,7 +3,7 @@ const { registerStudent, viewAllStudents, viewOneStudent, updateStudent,updateSt
 const express = require('express');
 const router = express.Router();
 
-const verifyToken = require('../middleware/authorization.js');
+const verifyToken = require('../middleware/auth');
 
 router.post('/register', registerStudent);
 

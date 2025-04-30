@@ -24,10 +24,9 @@ function EditLectureRoom() {
     power_outlets: '',
     addedBy: '',
     email: '',
-    department: '',
-    customDepartment: '',
+    faculty: '',
     utilization: 0,
-    updatedAt: '', // To store the last updated date
+    updatedAt: '',
   });
   const [validationMessages, setValidationMessages] = useState({
     roomName: '',
@@ -36,7 +35,6 @@ function EditLectureRoom() {
     power_outlets: '',
     addedBy: '',
     email: '',
-    customDepartment: '',
     quantity: {
       Projectors: '',
       Whiteboard: '',
@@ -53,15 +51,9 @@ function EditLectureRoom() {
       try {
         const response = await axios.get(`http://localhost:5000/api/lecture-rooms/${id}`);
         const data = response.data;
-        const predefinedDepartments = ['Computer Science', 'Physics', 'Chemistry', 'Mathematics'];
-        const department = predefinedDepartments.includes(data.department)
-          ? data.department
-          : 'Other';
-        const customDepartment = department === 'Other' ? data.department : '';
         setFormData({
           ...data,
-          department,
-          customDepartment,
+          faculty: data.faculty || '',
           available_equipments: data.available_equipments || [],
           quantity: data.quantity || {
             Projectors: 0,
@@ -230,25 +222,6 @@ function EditLectureRoom() {
     return true;
   };
 
-  const validateCustomDepartment = (value) => {
-    if (value.length > 20) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        customDepartment: 'Custom department must not exceed 20 characters',
-      }));
-      return false;
-    }
-    if (!/^[a-zA-Z\s]*$/.test(value)) {
-      setValidationMessages((prev) => ({
-        ...prev,
-        customDepartment: 'Custom department must contain only letters and spaces',
-      }));
-      return false;
-    }
-    setValidationMessages((prev) => ({ ...prev, customDepartment: '' }));
-    return true;
-  };
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -313,10 +286,6 @@ function EditLectureRoom() {
       if (value && !validateEmail(value)) {
         setFormData((prev) => ({ ...prev, email: '' }));
       }
-    } else if (name === 'customDepartment') {
-      if (value && !validateCustomDepartment(value)) {
-        setFormData((prev) => ({ ...prev, customDepartment: '' }));
-      }
     }
   };
 
@@ -332,18 +301,13 @@ function EditLectureRoom() {
       'power_outlets',
       'addedBy',
       'email',
-      'department',
+      'faculty',
     ];
     for (const field of requiredFields) {
       if (!formData[field]) {
         setAlert({ message: `${field} is required`, type: 'error' });
         return;
       }
-    }
-
-    if (formData.department === 'Other' && !formData.customDepartment) {
-      setAlert({ message: 'Custom department is required when selecting "Other"', type: 'error' });
-      return;
     }
 
     const equipmentsWithQuantity = formData.available_equipments.filter(
@@ -364,13 +328,8 @@ function EditLectureRoom() {
   };
 
   const handleConfirmUpdate = async () => {
-    const dataToSubmit = {
-      ...formData,
-      department: formData.department === 'Other' ? formData.customDepartment : formData.department,
-    };
-
     try {
-      await axios.put(`http://localhost:5000/api/lecture-rooms/${id}`, dataToSubmit);
+      await axios.put(`http://localhost:5000/api/lecture-rooms/${id}`, formData);
       setAlert({ message: 'Lecture room updated successfully!', type: 'success' });
       setShowConfirm(false);
       setTimeout(() => navigate('/view-records'), 2000);
@@ -512,7 +471,6 @@ function EditLectureRoom() {
               <option value="Auditorium">Auditorium</option>
               <option value="BYOD Lab">BYOD Lab</option>
               <option value="Conference Room">Conference Room</option>
-             
             </select>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Resources</h2>
@@ -607,6 +565,24 @@ function EditLectureRoom() {
             )}
           </div>
           <div className="mb-6">
+            <label className="block text-gray-800 font-semibold mb-2 text-lg">Faculty</label>
+            <select
+              name="faculty"
+              value={formData.faculty}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
+              required
+            >
+              <option value="">Select Faculty</option>
+              <option value="Computing">Computing</option>
+              <option value="Engineering">Engineering</option>
+              <option value="Science">Science</option>
+              <option value="Business">Business</option>
+              <option value="Arts">Arts</option>
+            </select>
+          </div>
+          <div className="mb-6">
             <label className="block text-gray-800 font-semibold mb-2 text-lg">Added By (Full Name)</label>
             <input
               type="text"
@@ -639,42 +615,6 @@ function EditLectureRoom() {
               <p className="text-sm text-red-600 mt-1">{validationMessages.email}</p>
             )}
           </div>
-          <div className="mb-6">
-            <label className="block text-gray-800 font-semibold mb-2 text-lg">Department</label>
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
-              required
-            >
-              <option value="">Select Department</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          {formData.department === 'Other' && (
-            <div className="mb-6">
-              <label className="block text-gray-800 font-semibold mb-2 text-lg">Name of the Department</label>
-              <input
-                type="text"
-                name="customDepartment"
-                value={formData.customDepartment}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
-                required
-                maxLength={20}
-              />
-              {validationMessages.customDepartment && (
-                <p className="text-sm text-red-600 mt-1">{validationMessages.customDepartment}</p>
-              )}
-            </div>
-          )}
           <div className="mb-6">
             <p className="text-gray-400 font-semibold text-lg">
               Last Updated: {formatDateTime(formData.updatedAt)}

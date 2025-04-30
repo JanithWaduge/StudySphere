@@ -199,9 +199,6 @@ function EditSchedule() {
         if (!value) {
           error = 'Department is required';
           updatedFormData.department = '';
-        } else if (value.length > 30) {
-          error = 'Must not exceed 30 characters';
-          updatedFormData.department = '';
         }
         break;
 
@@ -594,8 +591,7 @@ function EditSchedule() {
           {/* Department */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Department</label>
-            <input
-              type="text"
+            <select
               name="department"
               value={formData.department}
               onChange={handleChange}
@@ -603,8 +599,40 @@ function EditSchedule() {
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                 errors.department ? 'border-red-500' : 'border-gray-200'
               }`}
-              placeholder="Enter department"
-            />
+            >
+              <option value="">Select Department</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Software Engineering">Software Engineering</option>
+              <option value="Cyber Security">Cyber Security</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Interactive Media">Interactive Media</option>
+              <option value="Network Engineering">Network Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Electronic Engineering">Electronic Engineering</option>
+              <option value="Chemical Engineering">Chemical Engineering</option>
+              <option value="Mechatronics Engineering">Mechatronics Engineering</option>
+              <option value="Bio Medical Engineering">Bio Medical Engineering</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Microbiology">Microbiology</option>
+              <option value="Statistics">Statistics</option>
+              <option value="Accounting">Accounting</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Human Resource Management">Human Resource Management</option>
+              <option value="Management / Business Management">Management / Business Management</option>
+              <option value="Economics">Economics</option>
+              <option value="Creative & Performing Arts">Creative & Performing Arts</option>
+              <option value="Humanities & Social Sciences">Humanities & Social Sciences</option>
+              <option value="Languages & Literature">Languages & Literature</option>
+              <option value="Communication & Culture">Communication & Culture</option>
+              <option value="Other">Other</option>
+            </select>
             {errors.department && (
               <p className="text-red-500 text-sm mt-1">{errors.department}</p>
             )}
@@ -683,7 +711,8 @@ function EditSchedule() {
 
           {/* Recurrence */}
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Recurrence</label>
+            <label className="block text-gray-7
+            00 font-medium mb-2">Recurrence</label>
             <select
               name="recurrence"
               value={formData.recurrence}

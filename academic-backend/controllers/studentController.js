@@ -139,28 +139,33 @@ const deleteStudent = async (req, res) => {
 
 // Login Student
 const loginStudent = async (req, res) => {
+
   try {
-    const { username, password } = req.body;
+      const { username, password } = req.body;
 
-    const student = await studentModel.findOne({ username });
+      // input field validation
+      if (!username || !password) {
+          return res.status(400).json({ message: "Please enter username and password" });
+      }
 
-    if (!student) {
-      return res.status(404).json({ message: "Username not found" });
-    }
+      const student = await studentModel.findOne({ username });
 
-    const matchPassword = await bcrypt.compare(password, student.password);
+      if (!student) {
+          return res.status(404).json({ message: "Username not found.." });
+      }
 
-    if (!matchPassword) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+      const isPasswordValid = await bcrypt.compare(password, student.password);
 
-    const token = jwt.sign({ id: student.studentId, name: student.username}, process.env.JWT_SECRET, { expiresIn: '4h' });
-    res.status(200).json({ message: "Token created..", token });
+      if (!isPasswordValid) {
+          return res.status(401).json({ message: "Incorrect password" });
+      }
+
+      return res.status(200).json({ message: "Login successful" });
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Login error", error: err.message });
+      console.error(err);
+      res.status(500).json({ message: 'Internal server error' });
   }
-};
+}
 
 module.exports = { registerStudent, viewAllStudents, viewOneStudent, updateStudent, updateStudentPassword, deleteStudent, loginStudent};

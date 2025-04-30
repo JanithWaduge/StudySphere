@@ -10,7 +10,7 @@ const registerStudent = async (req, res) => {
         if (!name || !email || !phone || !address || !username || !password) {
             return res.status(400).json({ message: "Please enter all fields" });
         }
-
+//
         const hashedPassword = await bcrypt.hash(password, 10);
         
         const newStudent = new studentModel({            

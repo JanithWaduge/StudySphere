@@ -18,6 +18,7 @@ const Lecturers = () => {
       .catch((error) => console.error("Fetch Error:", error));
   };
 
+  //delete lectures
   const deleteLecturer = (lecturer) => {
     if (window.confirm("Are you sure you want to delete this lecturer?")) {
       Axios.delete("http://localhost:5000/api/deletelecturer", { data: { id: lecturer.id } })

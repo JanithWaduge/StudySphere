@@ -17,7 +17,7 @@ function RoleSelector() {
             Admin Login
           </button>
         </Link>
-
+//
         <Link to="/admin/register">
           <button className="w-full bg-white text-blue-600 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-100 transition duration-200">
             Admin Register

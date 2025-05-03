@@ -1,0 +1,1 @@
+StudySphere is a full-stack web application designed to automate academic scheduling for lecturers, students, rooms, and exams. It aims to eliminate scheduling conflicts and streamline academic resource allocation.

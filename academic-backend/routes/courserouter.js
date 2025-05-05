@@ -9,6 +9,4 @@ router.put('/updatecourse',controller.updateCourse);
 router.delete('/deletecourse',controller.deleteCourse);
 
 
-
-
 module.exports = router;

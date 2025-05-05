@@ -20,9 +20,15 @@ import RoleSelector from './RoleSelector';
 import AdminLogin from './AdminLogin';
 import AdminRegister from './AdminRegister';
 import AdminDashboard from './AdminDashboard';
+
 import UserLogin from './UserLogin';
 import UserRegister from './UserRegister';
 import UserDashboard from './UserDashboard';
+
+import StudentLogin from './loginStudent';
+import StudentRegister from './registerStudent';
+import StudentDashboard from './studentDashboard';
+
 import CourseLecturerReport from './CourseLecturerReport';
 import AddExam from './addExam';
 import ViewAllExams from './viewAllExams';
@@ -56,10 +62,17 @@ root.render(
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/register" element={<AdminRegister />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
         <Route path="/user/login" element={<UserLogin />} />
         <Route path="/user/register" element={<UserRegister />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
+        
+        <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/student/register" element={<StudentRegister />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+
         <Route path="/courselecreport" element={<CourseLecturerReport />} />
+
 
       </Routes>
     </>

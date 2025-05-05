@@ -1,176 +1,174 @@
 const studentModel = require('../models/student');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-
-// Create a new student
+// Register Student
 const registerStudent = async (req, res) => {
-    try {
-        const { name, email, phone, address, username, password } = req.body;
 
-        // input field validation
-        if (!name || !email || !phone || !address || !username || !password) {
-            return res.status(400).json({ message: "Please enter all fields" });
-        }
-//
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        const newStudent = new studentModel({            
-            name, 
-            email, 
-            phone, 
-            address, 
-            username,
-            password: hashedPassword,
-            registerDate: new Date()
-        });
+  try {
+    const { name, email, phone, address, username, password } = req.body;
 
-        const savedStudent = await newStudent.save();
+    
 
-        res.status(201).json({ message: "Student registered successfully", savedStudent });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "An error occurred while registering the student.", error: err.message });
+    if (!name || !email || !phone || !address || !username || !password) {
+      return res.status(400).json({ message: "Please fill all the fields" });
     }
-}
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newStudent = new studentModel({
+      name,
+      email,
+      phone,
+      address,
+      username,
+      password: hashedPassword,
+      registerDate: new Date()
+    });
+
+    const savedStudent = await newStudent.save();
+
+    res.status(200).json({ message: "Student Registered Successfully", savedStudent });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to Register Student", error: err.message });
+  }
+};
 
 
-// get all students
-const getAllStudents = async (req, res) => {
-
-    try {
-        const allStudents = await studentModel.find();
-
-        if (!allStudents) {
-            return res.status(404).json({ message: "No students are available." });
-        }
-
-        res.status(200).json({ message: "Students :", allStudents });
-
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({ message: "Error when fetching students..", error: err.message });
-    }
-}
+// View All Students
+const viewAllStudents = async (req, res) => {
+  try {
+    const allStudents = await studentModel.find();
+    res.status(200).json({ message: "All Students : ", allStudents });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to get All Students", error: err.message });
+  }
+};
 
 
-// get one student
+// View One Student
 const viewOneStudent = async (req, res) => {
-    try {
-        const studentId = req.params.id;
+  try {
+    const studentId = req.params.id;
 
-        const student = await studentModel.find({ studentId });
+    const student = await studentModel.findOne({ studentId });
 
-        return res.status(200).json({ message: "Student Details : ", student });
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Unable to get studnet by Id", error: err.message });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
     }
-}
+
+    return res.status(200).json({ message: "Student Details : ", student });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to get student by ID", error: err.message });
+  }
+};
 
 
-// update student
+// Update Student
 const updateStudent = async (req, res) => {
+  try {
+    const studentId = req.params.id;
 
-    try {
-        const { name, email, phone, address } = req.body;
+    const updatedStudent = await studentModel.findOneAndUpdate(
+      { studentId },
+      req.body,
+      { new: true }
+    );
 
-        // input field validation
-        if (!name || !email || !phone || !address) {
-            return res.status(400).json({ message: "Please enter all fields" });
-        }        
-
-        const studentId = req.params.id;
-
-        const updateFields = { name, email, phone, address};
-
-        const updatedStudent = await studentModel.findOneAndUpdate(
-            { studentId },  
-            updateFields,        
-            { new: true }        
-        );
-      
-        return res.status(200).json({ message: "Studnet details updated", updatedStudent });
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Unalbe to update the student" })
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student not found" });
     }
-}
 
-// update student
+    return res.status(200).json({ message: "Student Updated", updatedStudent });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to update student", error: err.message });
+  }
+};
+
+
+// Password update
 const updateStudentPassword = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const { password } = req.body;
 
-    try {
-        const {password } = req.body;
-        
-        const studentId = req.params.id;
-
-        if (password) {
-            updateFields.password = await bcrypt.hash(password, 10);
-        }
-
-        const updatedStudent = await studentModel.findOneAndUpdate(
-            { studentId },  
-            updateFields,        
-            { new: true }        
-        );
-      
-        return res.status(200).json({ message: "Password updated", updatedStudent });
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Unalbe to update the password" })
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
     }
-}
 
- 
-// delete student
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updatedStudent = await studentModel.findOneAndUpdate(
+      { studentId },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedStudent) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    return res.status(200).json({ message: "Password updated successfully", updatedStudent });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to update the password" });
+  }
+};
+
+
+// Delete Student
 const deleteStudent = async (req, res) => {
+  try {
+    const studentId = req.params.id;
 
-    try {
-        const studentId = req.params.id;
+    const deletedStudent = await studentModel.findOneAndDelete({ studentId });
 
-        const deletedStudent = await studentModel.findOneAndDelete({ studentId });
-
-        res.status(200).json({ message: "Student deleted..", deletedStudent });
-
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: "Error when deleting student..", erro: err.message });
+    if (!deletedStudent) {
+      return res.status(404).json({ message: "Student not found" });
     }
-}
+
+    return res.status(200).json({ message: "Student Deleted" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Unable to delete student", error: err.message });
+  }
+};
 
 
-// login student
+// Login Student
 const loginStudent = async (req, res) => {
 
-    try {
-        const { username, password } = req.body;
+  try {
+      const { username, password } = req.body;
 
-        // input field validation
-        if (!username || !password) {
-            return res.status(400).json({ message: "Please enter username and password" });
-        }
+      // input field validation
+      if (!username || !password) {
+          return res.status(400).json({ message: "Please enter username and password" });
+      }
 
-        const student = await studentModel.findOne({ username });
+      const student = await studentModel.findOne({ username });
 
-        if (!student) {
-            return res.status(404).json({ message: "Username not found.." });
-        }
+      if (!student) {
+          return res.status(404).json({ message: "Username not found.." });
+      }
 
-        const isPasswordValid = await bcrypt.compare(password, student.password);
+      const isPasswordValid = await bcrypt.compare(password, student.password);
 
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: "Incorrect password" });
-        }
+      if (!isPasswordValid) {
+          return res.status(401).json({ message: "Incorrect password" });
+      }
 
-        return res.status(200).json({ message: "Login successful" });
+      return res.status(200).json({ message: "Login successful" });
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Internal server error' });
-    }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Internal server error' });
+  }
 }
 
-module.exports = { registerStudent, getAllStudents, viewOneStudent, updateStudent, updateStudentPassword, deleteStudent, loginStudent };
+module.exports = { registerStudent, viewAllStudents, viewOneStudent, updateStudent, updateStudentPassword, deleteStudent, loginStudent};

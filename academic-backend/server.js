@@ -7,8 +7,6 @@ const app = express();
 const mongoose = require('mongoose');
 const router = require('./routes/courserouter');
 const router2 = require('./routes/lecturerouter');
-const router3 = require('./routes/studentRoute');
-const router4 = require('./routes/examrouter');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const router5 = require('./routes/courserout1');
@@ -18,8 +16,10 @@ const reportRoutes = require('./routes/reportRoutes');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 
-// Import report routes
-
+const studentRoutes = require('./routes/studentRoute');
+const examRoutes = require('./routes/examrouter');
+const enrollmentRoutes = require('./routes/enrollmentRoute');
+const courseRoutes = require('./routes/courserouter');
 
 // Load environment variables
 dotenv.config();
@@ -48,12 +48,18 @@ const server = app.listen(port,host, () => {
 
 app.use('/api',router);
 app.use('/api',router2);
-app.use('/api',router3);
-app.use('/api',router4);
 app.use('/api',router5);
+
+app.use('/student', studentRoutes);
+app.use('/exam', examRoutes);
+app.use('/enrollment', enrollmentRoutes);
+app.use('/course', courseRoutes);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/lecture-rooms', lectureRoomRoutes);
-app.use('/api/schedules', scheduleRoutes); // Add schedule routes
-app.use('/api/reports', reportRoutes); // Add report routes
+app.use('/api/schedules', scheduleRoutes); 
+app.use('/api/reports', reportRoutes); 
 
+
+module.exports = app;

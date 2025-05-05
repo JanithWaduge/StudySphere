@@ -4,8 +4,11 @@ const jwt = require('jsonwebtoken');
 
 // Register Student
 const registerStudent = async (req, res) => {
+
   try {
     const { name, email, phone, address, username, password } = req.body;
+
+    
 
     if (!name || !email || !phone || !address || !username || !password) {
       return res.status(400).json({ message: "Please fill all the fields" });

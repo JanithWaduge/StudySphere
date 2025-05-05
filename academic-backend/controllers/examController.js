@@ -1,5 +1,5 @@
 const examModel = require('../models/examModel');
-const Enrollment = require('../models/enrollment'); // Import enrollment model
+const Enrollment = require('../models/enrollmenetModel'); // Import enrollment model
 
 // Create a new exam
 const createExam = async (req, res) => {

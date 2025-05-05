@@ -26,7 +26,6 @@
     "react-router-dom": "^7.3.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
-    "tailwindcss": "^4.0.15",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
@@ -53,5 +52,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.4"
   }
 }

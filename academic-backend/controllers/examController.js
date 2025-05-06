@@ -1,20 +1,17 @@
 const examModel = require('../models/examModel');
-const Enrollment = require('../models/enrollment'); // Import enrollment model
+const Enrollment = require('../models/enrollmenetModel');
 
 // Create a new exam
 const createExam = async (req, res) => {
   try {
     const { code, examName, examDate, examDuration } = req.body;
 
-    // Validate input
     if (!code || !examName || !examDate || !examDuration) {
       return res.status(400).json({ message: "Please provide all required fields" });
     }
 
-    // Get the student count for the given course code
     const studentCount = await Enrollment.countDocuments({ code });
 
-    // Create new exam document
     const newExam = new examModel({
       code,
       examName,
@@ -33,6 +30,7 @@ const createExam = async (req, res) => {
   }
 };
 
+
 // View all exams
 const viewAllExams = async (req, res) => {
   try {
@@ -50,11 +48,13 @@ const viewAllExams = async (req, res) => {
   }
 };
 
+
 // View one exam
 const viewOneExam = async (req, res) => {
   try {
     const examId = req.params.id;
-    const exam = await examModel.findById(examId );
+
+    const exam = await examModel.findById(examId);
 
     if (!exam) {
       return res.status(404).json({ message: "Exam not found" });
@@ -82,7 +82,6 @@ const viewAllExamsForStudent = async (req, res) => {
 
     const courseCodes = [...new Set(enrollments.map(enrollment => enrollment.code))];
 
-    // Find exams that match any of these course codes
     const studentExams = await examModel.find({ code: { $in: courseCodes } });
 
     if (!studentExams || studentExams.length === 0) {
@@ -128,6 +127,7 @@ const rescheduleExam = async (req, res) => {
   }
 };
 
+
 // Delete exam
 const deleteExam = async (req, res) => {
   try {
@@ -146,7 +146,6 @@ const deleteExam = async (req, res) => {
     res.status(500).json({ message: "Error deleting exam", error: err.message });
   }
 };
-
 
 
 module.exports = {

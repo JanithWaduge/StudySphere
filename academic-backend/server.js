@@ -15,11 +15,13 @@ const scheduleRoutes = require('./routes/scheduleRoutes');
 const reportRoutes = require('./routes/reportRoutes'); 
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
+const courseRoutes = require('./routes/courserouter');
 
+// rashmi
 const studentRoutes = require('./routes/studentRoute');
 const examRoutes = require('./routes/examrouter');
 const enrollmentRoutes = require('./routes/enrollmentRoute');
-const courseRoutes = require('./routes/courserouter');
+
 
 // Load environment variables
 dotenv.config();
@@ -50,9 +52,6 @@ app.use('/api',router);
 app.use('/api',router2);
 app.use('/api',router5);
 
-app.use('/student', studentRoutes);
-app.use('/exam', examRoutes);
-app.use('/enrollment', enrollmentRoutes);
 app.use('/course', courseRoutes);
 
 app.use('/api/auth', authRoutes);
@@ -61,5 +60,9 @@ app.use('/api/lecture-rooms', lectureRoomRoutes);
 app.use('/api/schedules', scheduleRoutes); 
 app.use('/api/reports', reportRoutes); 
 
+// rashmi
+app.use('/student', studentRoutes);
+app.use('/exam', examRoutes);
+app.use('/enrollment', enrollmentRoutes);
 
 module.exports = app;

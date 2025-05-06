@@ -146,7 +146,6 @@ const loginStudent = async (req, res) => {
   try {
       const { username, password } = req.body;
 
-      // input field validation
       if (!username || !password) {
           return res.status(400).json({ message: "Please enter username and password" });
       }
@@ -163,7 +162,21 @@ const loginStudent = async (req, res) => {
           return res.status(401).json({ message: "Incorrect password" });
       }
 
-      return res.status(200).json({ message: "Login successful" });
+      const token = jwt.sign(
+        { studentId: student.studentId, username: student.username, name: student.name },
+        process.env.JWT_SECRET || 'sliit',
+        { expiresIn: '1d' }
+      );
+
+      return res.status(200).json({
+        message: "Login successful",
+        token, 
+        student: {
+          studentId: student.studentId,
+          username: student.username,
+          name: student.name,
+        }
+      });
 
   } catch (err) {
       console.error(err);

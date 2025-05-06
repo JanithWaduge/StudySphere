@@ -28,8 +28,11 @@ const Login = () => {
       });
 
       localStorage.setItem("token", res.data.token);
+
       alert("Login successful");
-      navigate("/student-dashboard");
+      
+      navigate("/student/dashboard");
+      
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
@@ -37,6 +40,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-500 to-orange-300 flex items-center justify-center px-4">
+      
       <form
         onSubmit={handleLogin}
         className="bg-white w-full max-w-md p-8 rounded-xl shadow-2xl"
@@ -87,6 +91,15 @@ const Login = () => {
         >
           Login
         </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="w-full mt-5 py-2 bg-orange-600 text-white rounded-lg font-semibold text-lg hover:bg-orange-700 transition duration-200"
+        >
+          Go to Home
+        </button>
+        
       </form>
     </div>
   );

@@ -23,7 +23,11 @@ const StudentHome = () => {
     if (!studentId) return;
 
     axios
+<<<<<<< Updated upstream
       .get(`http://localhost:5000/student/view/${studentId}`)
+=======
+      .get(`http://localhost:5000/api/student/view/${studentId}`)
+>>>>>>> Stashed changes
       .then((res) => {
         const data = res.data.student || res.data.Student || res.data[0] || res.data;
         setStudent(data);
@@ -44,7 +48,11 @@ const StudentHome = () => {
 
     useEffect(() => {
     axios
+<<<<<<< Updated upstream
       .get("http://localhost:5000/course/all")
+=======
+      .get("http://localhost:5000/api/courses")
+>>>>>>> Stashed changes
       .then((res) => setCourses(res.data.courses))
       .catch((err) => console.error("Error fetching courses:", err));
   }, []);

@@ -23,7 +23,15 @@ const StudentHome = () => {
     if (!studentId) return;
 
     axios
+
+
       .get(`http://localhost:5000/student/view/${studentId}`)
+
+      .get(`http://localhost:5000/api/student/view/${studentId}`)
+
+
+      .get(`http://localhost:5000/student/view/${studentId}`)
+
       .then((res) => {
         const data = res.data.student || res.data.Student || res.data[0] || res.data;
         setStudent(data);
@@ -44,7 +52,15 @@ const StudentHome = () => {
 
     useEffect(() => {
     axios
+
+
       .get("http://localhost:5000/course/all")
+
+      .get("http://localhost:5000/api/courses")
+
+
+      .get("http://localhost:5000/course/all")
+
       .then((res) => setCourses(res.data.courses))
       .catch((err) => console.error("Error fetching courses:", err));
   }, []);

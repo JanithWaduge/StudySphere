@@ -7,8 +7,11 @@ const controller3 = require('./controllers/studentController');
 const controller4 = require('./controllers/examController');
 const controller5 = require('./controllers/coursecon1');
 const router = require('./routes/lectureRoomRoutes');
+const timetableRoutes = require('./routes/timetableRoutes');
 
 app.use(cors());
+
+app.use('/api/timetable', timetableRoutes);
 
 app.use(
     express.urlencoded({

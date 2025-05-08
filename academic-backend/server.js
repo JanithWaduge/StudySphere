@@ -16,6 +16,7 @@ const reportRoutes = require('./routes/reportRoutes');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const courseRoutes = require('./routes/courserouter');
+const timetableRoutes = require('./routes/timetableRoutes');
 
 // rashmi
 const studentRoutes = require('./routes/studentRoute');
@@ -29,6 +30,7 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
+app.use('/api/timetable', timetableRoutes);
 
 const uri = 'mongodb+srv://janith:janith1428@cluster0.puzld.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 

@@ -256,9 +256,6 @@
   .\@container {
     container-type: inline-size;
   }
-  .\@container-\[inline-size\] {
-    container-type: inline-size;
-  }
   .pointer-events-auto {
     pointer-events: auto;
   }
@@ -1596,15 +1593,6 @@
   .border-yellow-400 {
     border-color: var(--color-yellow-400);
   }
-  .bg-\(--my_variable\) {
-    background-color: var(--my_variable);
-  }
-  .bg-\(color\:--my-color\) {
-    background-color: var(--my-color);
-  }
-  .bg-\[\#0088cc\] {
-    background-color: #0088cc;
-  }
   .bg-\[\#002147\] {
     background-color: #002147;
   }
@@ -1616,12 +1604,6 @@
   }
   .bg-\[color\:\#F5F5F5\] {
     background-color: #F5F5F5;
-  }
-  .bg-\[color\:var\(--my-color\)\] {
-    background-color: var(--my-color);
-  }
-  .bg-\[var\(--my_variable\)\] {
-    background-color: var(--my_variable);
   }
   .bg-black {
     background-color: var(--color-black);
@@ -1676,12 +1658,6 @@
   }
   .bg-red-500 {
     background-color: var(--color-red-500);
-  }
-  .bg-red-500\/50 {
-    background-color: color-mix(in oklab, var(--color-red-500) 50%, transparent);
-  }
-  .bg-red-500\/\[50\%\] {
-    background-color: color-mix(in oklab, var(--color-red-500) 50%, transparent);
   }
   .bg-red-600 {
     background-color: var(--color-red-600);
@@ -2306,15 +2282,6 @@
   }
   .whitespace-pre-wrap {
     white-space: pre-wrap;
-  }
-  .\[color\:red\] {
-    color: red;
-  }
-  .\[color\:red\]\/50 {
-    color: color-mix(in oklab, red 50%, transparent);
-  }
-  .\[color\:red\]\/50\! {
-    color: color-mix(in oklab, red 50%, transparent) !important;
   }
   .text-\[\#FF8C66\] {
     color: #FF8C66;

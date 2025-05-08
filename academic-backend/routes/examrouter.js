@@ -5,15 +5,14 @@ const router = express.Router();
 
 router.post('/create', createExam);
 
-router.get('/view-all', viewAllExams);
+router.get('/view-all', viewAllExams);  
 
 router.get('/view/:id', viewOneExam);
 
 router.get('/student-exams/:id', viewAllExamsForStudent);
 
-router.put('/update/:id', rescheduleExam); // ✅ expects :id from URL
+router.put('/update/:id', rescheduleExam);
 
-router.post('/delete', deleteExam); // ✅ Use POST since you're sending body
-
+router.delete('/delete/:id', deleteExam); 
 
 module.exports = router;

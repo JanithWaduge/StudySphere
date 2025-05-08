@@ -24,6 +24,7 @@ const StudentHome = () => {
 
     axios
 
+
       .get(`http://localhost:5000/student/view/${studentId}`)
 
       .get(`http://localhost:5000/api/student/view/${studentId}`)
@@ -52,9 +53,17 @@ const StudentHome = () => {
     useEffect(() => {
     axios
 
+
+
+
+
       .get("http://localhost:5000/course/all")
 
       .get("http://localhost:5000/api/courses")
+
+
+
+
 
       .get("http://localhost:5000/course/all")
 

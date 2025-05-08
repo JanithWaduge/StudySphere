@@ -17,6 +17,7 @@ function AddSchedule() {
     eventName: '',
     faculty: '',
     department: '',
+    customDepartment: '',
     date: '',
     startTime: '',
     duration: '',
@@ -133,21 +134,17 @@ function AddSchedule() {
   // Validate individual field on blur
   const validateField = (name, value) => {
     let error = '';
-    let updatedFormData = { ...formData };
 
     switch (name) {
       case 'roomName':
         if (!value) {
           error = 'Room name is required';
-          updatedFormData.roomName = '';
         } else {
           const selectedRoom = rooms.find((room) => room.roomName === value);
           if (!selectedRoom) {
             error = 'Please select a valid room';
-            updatedFormData.roomName = '';
           } else if (!/^[A-Z][0-9]{3}$/.test(value)) {
             error = 'Room name must be in the format A000 (e.g., A401)';
-            updatedFormData.roomName = '';
           }
         }
         break;
@@ -155,7 +152,6 @@ function AddSchedule() {
       case 'eventType':
         if (!value) {
           error = 'Event type is required';
-          updatedFormData.eventType = '';
         }
         break;
 
@@ -163,10 +159,8 @@ function AddSchedule() {
         if (formData.eventType === 'Other') {
           if (!value || value.trim() === '') {
             error = 'Custom event type is required';
-            updatedFormData.customEventType = '';
           } else if (value.length > 20) {
             error = 'Must not exceed 20 characters';
-            updatedFormData.customEventType = '';
           }
         }
         break;
@@ -174,44 +168,42 @@ function AddSchedule() {
       case 'eventName':
         if (!value) {
           error = 'Event name is required';
-          updatedFormData.eventName = '';
         } else if (!/^[a-zA-Z0-9\s]+$/.test(value)) {
           error = 'Only letters, numbers, and spaces allowed';
-          updatedFormData.eventName = '';
-        } else if (value.length > 20) {
-          error = 'Must not exceed 20 characters';
-          updatedFormData.eventName = '';
+        } else if (value.length > 50) {
+          error = 'Must not exceed 50 characters';
         }
         break;
 
       case 'faculty':
         if (!value) {
           error = 'Faculty is required';
-          updatedFormData.faculty = '';
         }
         break;
 
       case 'department':
         if (!value) {
           error = 'Department is required';
-          updatedFormData.department = '';
-        } else if (value.length > 30) {
-          error = 'Must not exceed 30 characters';
-          updatedFormData.department = '';
+        }
+        break;
+
+      case 'customDepartment':
+        if (formData.department === 'Other') {
+          if (!value || value.trim() === '') {
+            error = 'Custom department is required';
+          }
         }
         break;
 
       case 'date':
         if (!value) {
           error = 'Date is required';
-          updatedFormData.date = '';
         } else {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const selectedDate = new Date(value);
           if (selectedDate < today) {
             error = 'Date cannot be in the past';
-            updatedFormData.date = '';
           }
         }
         break;
@@ -219,22 +211,18 @@ function AddSchedule() {
       case 'startTime':
         if (!value) {
           error = 'Start time is required';
-          updatedFormData.startTime = '';
         } else if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(value)) {
           error = 'Must be in HH:MM format (e.g., 09:00)';
-          updatedFormData.startTime = '';
         }
         break;
 
       case 'duration':
         if (!value) {
           error = 'Duration is required';
-          updatedFormData.duration = '';
         } else {
           const durationNum = parseInt(value, 10);
           if (isNaN(durationNum) || durationNum < 1) {
             error = 'Must be a positive number';
-            updatedFormData.duration = '';
           }
         }
         break;
@@ -242,44 +230,36 @@ function AddSchedule() {
       case 'recurrence':
         if (!value) {
           error = 'Recurrence is required';
-          updatedFormData.recurrence = 'No';
         }
         break;
 
       case 'recurrenceFrequency':
         if (formData.recurrence === 'Yes' && !value) {
           error = 'Recurrence frequency is required';
-          updatedFormData.recurrenceFrequency = '';
         }
         break;
 
       case 'priorityLevel':
         if (!value) {
           error = 'Priority level is required';
-          updatedFormData.priorityLevel = '';
         }
         break;
 
       case 'createdBy':
         if (!value) {
           error = 'Created by is required';
-          updatedFormData.createdBy = '';
         } else if (value.length > 20) {
           error = 'Must not exceed 20 characters';
-          updatedFormData.createdBy = '';
         }
         break;
 
       case 'email':
         if (!value) {
           error = 'Email is required';
-          updatedFormData.email = '';
         } else if (!/^\S+@\S+\.\S+$/.test(value)) {
           error = 'Please enter a valid email';
-          updatedFormData.email = '';
         } else if (value.length > 50) {
           error = 'Must not exceed 50 characters';
-          updatedFormData.email = '';
         }
         break;
 
@@ -287,7 +267,6 @@ function AddSchedule() {
         break;
     }
 
-    setFormData(updatedFormData);
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
@@ -303,6 +282,7 @@ function AddSchedule() {
       'eventName',
       'faculty',
       'department',
+      'customDepartment',
       'date',
       'startTime',
       'duration',
@@ -313,15 +293,20 @@ function AddSchedule() {
       'email',
     ];
 
-    let hasErrors = false;
+    let newErrors = {};
     fieldsToValidate.forEach((field) => {
       validateField(field, formData[field]);
       if (errors[field]) {
-        hasErrors = true;
+        newErrors[field] = errors[field];
       }
     });
 
-    if (hasErrors) return;
+    // Check if any validation errors exist
+    const hasErrors = Object.values({ ...errors, ...newErrors }).some((error) => error);
+    if (hasErrors) {
+      setErrors((prev) => ({ ...prev, ...newErrors }));
+      return;
+    }
 
     // Check room availability
     if (formData.status === 'Under Maintenance') {
@@ -329,7 +314,6 @@ function AddSchedule() {
         ...prev,
         roomName: `This room (${formData.roomName}) is under maintenance. Please select another room.`,
       }));
-      setFormData((prev) => ({ ...prev, roomName: '' }));
       return;
     }
 
@@ -339,7 +323,7 @@ function AddSchedule() {
       eventType: formData.eventType === 'Other' ? formData.customEventType : formData.eventType,
       eventName: formData.eventName,
       faculty: formData.faculty,
-      department: formData.department,
+      department: formData.department === 'Other' ? formData.customDepartment : formData.department,
       date: formData.date,
       startTime: formData.startTime,
       duration: formData.duration,
@@ -366,7 +350,7 @@ function AddSchedule() {
         customEventType: formData.eventType === 'Other' ? formData.customEventType : undefined,
         eventName: formData.eventName,
         faculty: formData.faculty,
-        department: formData.department,
+        department: formData.department === 'Other' ? formData.customDepartment : formData.department,
         date: formData.date,
         startTime: formData.startTime,
         duration: parseInt(formData.duration, 10),
@@ -474,7 +458,11 @@ function AddSchedule() {
 
       {/* Form */}
       <div className="container mx-auto max-w-2xl bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg">
-        <h1 className="text-3xl font-bold text-orange-600 text-center mb-8">Add Schedule</h1>
+        <h1 className="text-4xl font-extrabold text-gray-800 text-center tracking-tight">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+            Add Schedule
+          </span>
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Room Name */}
           <div>
@@ -586,9 +574,7 @@ function AddSchedule() {
               <option value="">Select Faculty</option>
               <option value="Computing">Computing</option>
               <option value="Engineering">Engineering</option>
-              <option value="Architecture">Architecture</option>
               <option value="Science">Science</option>
-              <option value="Hospitality">Hospitality</option>
               <option value="Business">Business</option>
               <option value="Arts">Arts</option>
             </select>
@@ -600,8 +586,7 @@ function AddSchedule() {
           {/* Department */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Department</label>
-            <input
-              type="text"
+            <select
               name="department"
               value={formData.department}
               onChange={handleChange}
@@ -609,10 +594,60 @@ function AddSchedule() {
               className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                 errors.department ? 'border-red-500' : 'border-gray-200'
               }`}
-              placeholder="Enter department"
-            />
+            >
+              <option value="">Select Department</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Software Engineering">Software Engineering</option>
+              <option value="Cyber Security">Cyber Security</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Interactive Media">Interactive Media</option>
+              <option value="Network Engineering">Network Engineering</option>
+              <option value="Civil Engineering">Civil Engineering</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Electronic Engineering">Electronic Engineering</option>
+              <option value="Chemical Engineering">Chemical Engineering</option>
+              <option value="Mechatronics Engineering">Mechatronics Engineering</option>
+              <option value="Bio Medical Engineering">Bio Medical Engineering</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Biology">Biology</option>
+              <option value="Microbiology">Microbiology</option>
+              <option value="Statistics">Statistics</option>
+              <option value="Accounting">Accounting</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Human Resource Management">Human Resource Management</option>
+              <option value="Management / Business Management">Management / Business Management</option>
+              <option value="Economics">Economics</option>
+              <option value="Creative & Performing Arts">Creative & Performing Arts</option>
+              <option value="Humanities & Social Sciences">Humanities & Social Sciences</option>
+              <option value="Languages & Literature">Languages & Literature</option>
+              <option value="Communication & Culture">Communication & Culture</option>
+              <option value="Other">Other</option>
+            </select>
             {errors.department && (
               <p className="text-red-500 text-sm mt-1">{errors.department}</p>
+            )}
+            {formData.department === 'Other' && (
+              <div className="mt-2">
+                <input
+                  type="text"
+                  name="customDepartment"
+                  value={formData.customDepartment}
+                  onChange={handleChange}
+                  onBlur={(e) => validateField(e.target.name, e.target.value)}
+                  placeholder="Enter custom department"
+                  className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    errors.customDepartment ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                />
+                {errors.customDepartment && (
+                  <p className="text-red-500 text-sm mt-1">{errors.customDepartment}</p>
+                )}
+              </div>
             )}
           </div>
 
@@ -636,7 +671,8 @@ function AddSchedule() {
 
           {/* Start Time */}
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Start Time (HH:MM)</label>
+            <label className="block text-gray-7
+00 font-medium mb-2">Start Time (HH:MM)</label>
             <input
               type="time"
               name="startTime"
@@ -670,6 +706,9 @@ function AddSchedule() {
               <option value="90">1.5 hours</option>
               <option value="120">2 hours</option>
               <option value="180">3 hours</option>
+              <option value="240">4 hours</option>
+              <option value="300">5 hours</option>
+              <option value="360">6 hours</option>
             </select>
             {errors.duration && (
               <p className="text-red-500 text-sm mt-1">{errors.duration}</p>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import Alert from './Alert';
-import { EyeIcon, PencilIcon, TrashIcon, ClockIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { EyeIcon, PencilIcon, TrashIcon, ClockIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
 function ViewRecords() {
   const navigate = useNavigate();
@@ -18,6 +18,9 @@ function ViewRecords() {
   const [showCardView, setShowCardView] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [showResourcesPopup, setShowResourcesPopup] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [deletedRoomName, setDeletedRoomName] = useState('');
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -38,12 +41,17 @@ function ViewRecords() {
   }, []);
 
   const fetchLectureRooms = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/lecture-rooms');
+      console.log('Fetched Lecture Rooms:', response.data);
       setLectureRooms(response.data);
       setFilteredRooms(response.data);
     } catch (error) {
       setAlert({ message: 'Failed to fetch lecture rooms', type: 'error' });
+      console.error('Error fetching lecture rooms:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,50 +68,44 @@ function ViewRecords() {
     if (room.condition === 'Needs to Repair') {
       return 'Under Maintenance';
     }
-
     const currentTime = new Date();
     const isOccupied = schedules.some((schedule) => {
       if (schedule.roomName !== room.roomName) return false;
-
       const scheduleDate = new Date(schedule.date);
       const [startHours, startMinutes] = schedule.startTime.split(':').map(Number);
       const [endHours, endMinutes] = schedule.endTime.split(':').map(Number);
-
       const startTime = new Date(scheduleDate);
       startTime.setHours(startHours, startMinutes, 0, 0);
-
       const endTime = new Date(scheduleDate);
       endTime.setHours(endHours, endMinutes, 0, 0);
-
       return currentTime >= startTime && currentTime <= endTime;
     });
-
     return isOccupied ? 'Occupied' : 'Available';
   };
 
   const getStatusStyle = (status) => {
     switch (status) {
       case 'Available':
-        return 'text-green-600 font-bold flex items-center';
+        return 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium';
       case 'Occupied':
-        return 'text-red-600 font-bold flex items-center';
+        return 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium';
       case 'Under Maintenance':
-        return 'text-yellow-600 font-bold flex items-center';
+        return 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium';
       default:
-        return 'text-gray-600';
+        return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm font-medium';
     }
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'Available':
-        return '✅';
-      case 'Occupied':
-        return '⛔';
-      case 'Under Maintenance':
-        return '⚠️';
+  const getConditionClass = (condition) => {
+    switch (condition) {
+      case 'Excellent':
+        return 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium';
+      case 'Good':
+        return 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium';
+      case 'Needs to Repair':
+        return 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-sm font-medium';
       default:
-        return '';
+        return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm font-medium';
     }
   };
 
@@ -114,20 +116,15 @@ function ViewRecords() {
       const currentTime = new Date();
       const occupiedSchedule = schedules.find((schedule) => {
         if (schedule.roomName !== room.roomName) return false;
-
         const scheduleDate = new Date(schedule.date);
         const [startHours, startMinutes] = schedule.startTime.split(':').map(Number);
         const [endHours, endMinutes] = schedule.endTime.split(':').map(Number);
-
         const startTime = new Date(scheduleDate);
         startTime.setHours(startHours, startMinutes, 0, 0);
-
         const endTime = new Date(scheduleDate);
         endTime.setHours(endHours, endMinutes, 0, 0);
-
         return currentTime >= startTime && currentTime <= endTime;
       });
-
       if (occupiedSchedule) {
         navigate(`/view-schedules?roomName=${encodeURIComponent(room.roomName)}&scheduleId=${occupiedSchedule._id}&showOccupiedPopup=true`);
       } else {
@@ -154,16 +151,11 @@ function ViewRecords() {
       setShowRecentSearches(false);
       return;
     }
-
     saveSearchQuery(query);
     const searchTerm = query.toLowerCase().trim();
     const filtered = lectureRooms.filter((room) => {
-      if (room.roomName.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
-      if (room.location.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
+      if (room.roomName.toLowerCase().includes(searchTerm)) return true;
+      if (room.location.toLowerCase().includes(searchTerm)) return true;
       const equipments = Array.isArray(room.available_equipments)
         ? room.available_equipments.map((equipment) => equipment.toLowerCase())
         : [];
@@ -171,31 +163,16 @@ function ViewRecords() {
       if (queryEquipments.length > 1) {
         return queryEquipments.every((q) => equipments.includes(q));
       } else {
-        if (equipments.includes(searchTerm)) {
-          return true;
-        }
+        if (equipments.includes(searchTerm)) return true;
       }
-      if (room.seating_type.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
-      if (searchTerm === 'air conditioning' && room.air_conditioning) {
-        return true;
-      }
-      if (room.condition.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
-      if (room.department && room.department.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
-      if (room.addedBy.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
-      if (room.email.toLowerCase().includes(searchTerm)) {
-        return true;
-      }
+      if (room.seating_type.toLowerCase().includes(searchTerm)) return true;
+      if (searchTerm === 'air conditioning' && room.air_conditioning) return true;
+      if (room.condition.toLowerCase().includes(searchTerm)) return true;
+      if (room.faculty && room.faculty.toLowerCase().includes(searchTerm)) return true;
+      if (room.addedBy.toLowerCase().includes(searchTerm)) return true;
+      if (room.email.toLowerCase().includes(searchTerm)) return true;
       return false;
     });
-
     if (filtered.length === 0) {
       setSearchError('No results found for your search.');
       setShowCardView(false);
@@ -238,7 +215,8 @@ function ViewRecords() {
   const handleDelete = async () => {
     try {
       await axios.delete(`http://localhost:5000/api/lecture-rooms/${roomToDelete._id}`);
-      setAlert({ message: 'Lecture room deleted successfully!', type: 'success' });
+      setDeletedRoomName(roomToDelete.roomName);
+      setShowSuccessModal(true);
       setShowConfirm(false);
       setRoomToDelete(null);
       fetchLectureRooms();
@@ -254,135 +232,75 @@ function ViewRecords() {
     setRoomToDelete(null);
   };
 
-  const handleAddRoom = () => {
-    navigate('/add-lecture-room'); // Assuming this is the route for adding a room
+  const handleSuccessClose = () => {
+    setShowSuccessModal(false);
+    setDeletedRoomName('');
   };
 
-  const getConditionClass = (condition) => {
-    switch (condition) {
-      case 'Excellent':
-        return 'text-green-600 font-medium';
-      case 'Good':
-        return 'text-yellow-600 font-medium';
-      case 'Needs to Repair':
-        return 'text-red-600 font-medium';
-      default:
-        return 'text-gray-600';
-    }
+  const handleAddRoom = () => {
+    navigate('/add-lecture-room');
   };
 
   return (
-    <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-100 via-blue-50 to-gray-200">
-      {alert && <Alert message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-300">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 transform transition-all duration-300 scale-100">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Confirm Deletion</h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Are you sure you want to delete the{' '}
-              <span className="font-semibold text-orange-600">{roomToDelete.roomName}</span>{' '}
-              lecture room record? This action cannot be undone.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={handleCancelDelete}
-                className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium"
-              >
-                Delete
-              </button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 font-sans">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-white shadow-md py-4 px-6">
+        <div className="container mx-auto max-w-7xl flex justify-between items-center">
+          <div>
+          <h1 className="text-4xl font-extrabold text-gray-800 text-center tracking-tight">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+            Rooms & Resources Management
+          </span>
+        </h1> 
+            <nav className="text-sm text-gray-600">
+              <Link to="/admin/dashboard" className="hover:text-orange-600">Dashboard</Link>  <span>Lecture Rooms</span>
+            </nav>
           </div>
+          <button
+            onClick={handleAddRoom}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-md"
+          >
+            Add Room
+          </button>
         </div>
-      )}
-      {showResourcesPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-opacity duration-300">
-          <div className="bg-white p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200 transform transition-all duration-300 scale-100">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Resources Details</h2>
-            <div className="space-y-3 text-gray-700">
-              <p>
-                <strong className="font-medium text-gray-800">Available Equipment:</strong>{' '}
-                {Array.isArray(showResourcesPopup.available_equipments) && showResourcesPopup.available_equipments.length > 0
-                  ? showResourcesPopup.available_equipments.join(', ')
-                  : 'None'}
-              </p>
-              {Array.isArray(showResourcesPopup.available_equipments) && showResourcesPopup.available_equipments.length > 0 && (
-                <div className="ml-4 space-y-2">
-                  {showResourcesPopup.available_equipments.map((equipment) => (
-                    <p key={equipment}>
-                      <strong className="font-medium text-gray-800">{equipment} Quantity:</strong>{' '}
-                      {(showResourcesPopup.quantity && showResourcesPopup.quantity[equipment]) || 0}
-                    </p>
-                  ))}
-                </div>
-              )}
-              <p>
-                <strong className="font-medium text-gray-800">Seating Type:</strong>{' '}
-                {showResourcesPopup.seating_type || 'N/A'}
-              </p>
-              <p>
-                <strong className="font-medium text-gray-800">Air Conditioning:</strong>{' '}
-                {showResourcesPopup.air_conditioning ? 'Yes' : 'No'}
-              </p>
-              <p>
-                <strong className="font-medium text-gray-800">Power Outlets:</strong>{' '}
-                {showResourcesPopup.power_outlets || 'N/A'}
-              </p>
-            </div>
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setShowResourcesPopup(null)}
-                className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="container mx-auto max-w-7xl">
-        <h1 className="text-4xl font-bold mb-6 text-center tracking-tight 
-               bg-gradient-to-r from-orange-500 to-orange-700 
-               bg-clip-text text-transparent">
-          Lecture Room Records
-        </h1>
-        <div className="flex justify-between items-center mb-10">
-          <div className="flex space-x-4 items-center w-full" ref={searchRef}>
-            <div className="relative w-3/4">
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8">
+        {alert && <Alert message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
+
+        {/* Search Bar */}
+        <div className="mb-8 bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center space-x-4" ref={searchRef}>
+            <div className="relative flex-1">
               <input
                 type="text"
-                placeholder="Search by room name, location, department, etc."
+                placeholder="Search by room name, location, faculty, etc."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setShowRecentSearches(true)}
                 onKeyPress={handleKeyPress}
-                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md bg-white text-gray-700 placeholder-gray-400"
+                className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-500"
+                aria-label="Search lecture rooms"
               />
-              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
               {showRecentSearches && recentSearches.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-                  <div className="flex justify-between items-center px-4 py-2 border-b border-gray-200">
-                    <span className="text-sm font-semibold text-gray-700">Recent Searches</span>
+                <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-xl z-10 max-h-60 overflow-y-auto">
+                  <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                    <span className="text-sm font-medium text-gray-700">Recent Searches</span>
                     <button
                       onClick={handleClearRecentSearches}
                       className="text-sm text-red-600 hover:text-red-700 transition-colors duration-200"
@@ -394,7 +312,7 @@ function ViewRecords() {
                     <div
                       key={index}
                       onClick={() => handleSelectRecentSearch(search)}
-                      className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors duration-200"
+                      className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
                     >
                       <ClockIcon className="h-4 w-4 text-gray-400 mr-2" />
                       <span className="text-gray-700 text-sm">{search}</span>
@@ -403,185 +321,313 @@ function ViewRecords() {
                 </div>
               )}
             </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={() => handleSearch()}
-                className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md"
-              >
-                Search
-              </button>
-              <button
-                onClick={handleAddRoom}
-                className="bg-[color:#34495E] text-white px-6 py-3 rounded-lg hover:bg-[color:#2c3e50] transition-colors duration-200 font-medium shadow-sm hover:shadow-md"
-              >
-                Add Room
-              </button>
+            <button
+              onClick={() => handleSearch()}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-md"
+            >
+              Search
+            </button>
+          </div>
+          {searchError && (
+            <p className="text-red-600 text-sm mt-4 text-center">{searchError}</p>
+          )}
+        </div>
+
+        {/* Confirmation Modal */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
+            <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-100 animate-scale-in" role="dialog" aria-label="Confirm deletion">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Confirm Deletion</h2>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete{' '}
+                <span className="font-semibold text-orange-600">{roomToDelete.roomName}</span>? This action cannot be undone.
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={handleCancelDelete}
+                  className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 font-medium"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        {searchError && (
-          <div className="text-center mb-10">
-            <p className="text-gray-600 font-medium text-lg">{searchError}</p>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
+            <div className="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full border border-gray-100 animate-scale-in" role="dialog" aria-label="Deletion success">
+              <div className="flex items-center justify-center mb-4">
+                <CheckCircleIcon className="h-12 w-12 text-green-500" />
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 text-center mb-4">Success</h2>
+              <p className="text-gray-600 text-center mb-6">
+                Lecture room <span className="font-semibold text-orange-600">{deletedRoomName}</span> deleted successfully!
+              </p>
+              <div className="flex justify-center">
+                <button
+                  onClick={handleSuccessClose}
+                  className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2 rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all duration-200 font-medium shadow-md"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
           </div>
         )}
-        {showCardView ? (
-          <div className="relative">
-            <button
-              onClick={handleCloseCardView}
-              className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors duration-200 shadow-sm"
-              aria-label="Close card view"
-            >
-              <XMarkIcon className="h-5 w-5 text-gray-600" />
-            </button>
-            <div className={filteredRooms.length === 1 ? "flex justify-center items-center min-h-[50vh]" : "flex justify-center"}>
-              <div className={filteredRooms.length === 1 ? "w-full max-w-lg" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl"}>
+
+        {/* Resources Modal */}
+        {showResourcesPopup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
+            <div className="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full border border-gray-100 animate-scale-in" role="dialog" aria-label="Resources details">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Resources Details</h2>
+              <div className="space-y-3 text-gray-700">
+                <p>
+                  <strong className="font-medium text-gray-800">Available Equipment:</strong>{' '}
+                  {Array.isArray(showResourcesPopup.available_equipments) && showResourcesPopup.available_equipments.length > 0
+                    ? showResourcesPopup.available_equipments.join(', ')
+                    : 'None'}
+                </p>
+                {Array.isArray(showResourcesPopup.available_equipments) && showResourcesPopup.available_equipments.length > 0 && (
+                  <div className="ml-4 space-y-2">
+                    {showResourcesPopup.available_equipments.map((equipment) => (
+                      <p key={equipment}>
+                        <strong className="font-medium text-gray-800">{equipment} Quantity:</strong>{' '}
+                        {(showResourcesPopup.quantity && showResourcesPopup.quantity[equipment]) || 0}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                <p>
+                  <strong className="font-medium text-gray-800">Seating Type:</strong>{' '}
+                  {showResourcesPopup.seating_type || 'Not Specified'}
+                </p>
+                <p>
+                  <strong className="font-medium text-gray-800">Air Conditioning:</strong>{' '}
+                  {showResourcesPopup.air_conditioning ? 'Yes' : 'No'}
+                </p>
+                <p>
+                  <strong className="font-medium text-gray-800">Power Outlets:</strong>{' '}
+                  {showResourcesPopup.power_outlets || 'Not Specified'}
+                </p>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setShowResourcesPopup(null)}
+                  className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-all duration-200 font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Card */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold mb-6">
+  <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+    Room Records
+  </span>
+</h2>
+
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-orange-500 border-solid"></div>
+            </div>
+          ) : lectureRooms.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No lecture rooms found.</p>
+              <button
+                onClick={handleAddRoom}
+                className="mt-4 bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-all duration-200 font-medium"
+              >
+                Add a Room
+              </button>
+            </div>
+          ) : showCardView ? (
+            <div className="relative">
+              <button
+                onClick={handleCloseCardView}
+                className="absolute top-4 right-4 p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-all duration-200 shadow-sm hover:scale-110"
+                aria-label="Close card view"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-600" />
+              </button>
+              <div className={filteredRooms.length === 1 ? "flex justify-center items-center min-h-[50vh]" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"}>
                 {filteredRooms.map((room) => {
                   const status = getRoomStatus(room);
                   return (
                     <div
                       key={room._id}
-                      className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1"
+                      className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 hover:scale-105"
                     >
-                      <h2 className="text-2xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">{room.roomName}</h2>
-                      <div className="space-y-4 text-gray-700">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">{room.roomName}</h3>
+                      <div className="space-y-3 text-gray-700 text-sm">
                         <div className="flex justify-between items-center">
-                          <p>
-                            <strong className="font-medium text-gray-800">Location:</strong> {room.location}
-                          </p>
-                          <span className={`text-sm font-medium px-2 py-1 rounded-full ${getConditionClass(room.condition)} bg-opacity-10 ${room.condition === 'Excellent' ? 'bg-green-100' : room.condition === 'Good' ? 'bg-yellow-100' : 'bg-red-100'}`}>
-                            {room.condition}
-                          </span>
+                          <p><strong className="font-medium">Location:</strong> {room.location}</p>
+                          <span className={getConditionClass(room.condition)}>{room.condition}</span>
                         </div>
-                        <p>
-                          <strong className="font-medium text-gray-800">Capacity:</strong> {room.capacity} seats
-                        </p>
+                        <p><strong className="font-medium">Capacity:</strong> {room.capacity} seats</p>
+                        <p><strong className="font-medium">Room Type:</strong> {room.room_type || 'Not Specified'}</p>
                         <div className="flex items-center">
-                          <p>
-                            <strong className="font-medium text-gray-800">Resources:</strong>
-                          </p>
+                          <p><strong className="font-medium">Resources:</strong></p>
                           <button
                             onClick={() => setShowResourcesPopup(room)}
                             className="ml-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                            aria-label="View resources"
                           >
                             <EyeIcon className="h-5 w-5" />
                           </button>
                         </div>
+                        <p><strong className="font-medium">Status:</strong> <span className={getStatusStyle(status)}>{status}</span></p>
+                        <p><strong className="font-medium">Faculty:</strong> {room.faculty || 'Not Specified'}</p>
+                        <p><strong className="font-medium">Added By:</strong> {room.addedBy}</p>
                         <p>
-                          <strong className="font-medium text-gray-800">Status:</strong>{' '}
-                          <span className={getStatusStyle(status)}>
-                            {getStatusIcon(status)} {status}
-                          </span>
-                        </p>
-                        <p>
-                          <strong className="font-medium text-gray-800">Department:</strong>{' '}
-                          {room.department || 'Not Specified'}
-                        </p>
-                        <p>
-                          <strong className="font-medium text-gray-800">Added By:</strong> {room.addedBy}
-                        </p>
-                        <p>
-                          <strong className="font-medium text-gray-800">Email:</strong>{' '}
-                          <a href={`mailto:${room.email}`} className="text-blue-600 hover:underline">{room.email}</a>
+                          <strong className="font-medium">Email:</strong>{' '}
+                          <a href={`mailto:${room.email}`} className="text-blue-600 hover:underline truncate">{room.email}</a>
                         </p>
                       </div>
-                      <div className="mt-6 flex justify-end space-x-3">
-                        <Link to={`/edit-lecture-room/${room._id}`} className="w-24">
-                          <button className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center justify-center space-x-2 shadow-sm hover:shadow-md">
-                            <PencilIcon className="h-4 w-4" />
-                            <span>Edit</span>
+                      <div className="mt-4 flex justify-end space-x-2">
+                        <div className="group relative">
+                          <Link to={`/edit-lecture-room/${room._id}`}>
+                            <button className="p-2 text-blue-600 hover:text-blue-800 transition-all duration-200" aria-label="Edit room">
+                              <PencilIcon className="h-5 w-5" />
+                            </button>
+                          </Link>
+                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2">Edit</span>
+                        </div>
+                        <div className="group relative">
+                          <button
+                            onClick={() => handleDeleteConfirm(room)}
+                            className="p-2 text-red-600 hover:text-red-800 transition-all duration-200"
+                            aria-label="Delete room"
+                          >
+                            <TrashIcon className="h-5 w-5" />
                           </button>
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteConfirm(room)}
-                          className="w-30 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center justify-center space-x-2 shadow-sm hover:shadow-md"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
-                        </button>
+                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2">Delete</span>
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto shadow-lg rounded-xl">
-            <table className="w-full bg-white rounded-xl border border-gray-200">
-              <thead>
-                <tr className="bg-deep-charcoal text-white text-sm font-semibold uppercase tracking-wide">
-                  <th className="p-4 text-left border-b border-gray-200">Room Name</th>
-                  <th className="p-4 text-left border-b border-gray-200">Location</th>
-                  <th className="p-4 text-left border-b border-gray-200">Capacity</th>
-                  <th className="p-4 text-left border-b border-gray-200">Resources</th>
-                  <th className="p-4 text-left border-b border-gray-200">Condition</th>
-                  <th className="p-4 text-left border-b border-gray-200">Department</th>
-                  <th className="p-4 text-left border-b border-gray-200">Added By</th>
-                  <th className="p-4 text-left border-b border-gray-200">Email</th>
-                  <th className="p-4 text-left border-b border-gray-200">Status</th>
-                  <th className="p-4 text-left border-b border-gray-200">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lectureRooms.map((room, index) => {
-                  const status = getRoomStatus(room);
-                  return (
-                    <tr
-                      key={room._id}
-                      className={`${
-                        index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                      } hover:bg-gray-100 transition-colors duration-200 border-b border-gray-200`}
-                    >
-                      <td className="p-4 text-gray-800 font-medium">{room.roomName}</td>
-                      <td className="p-4 text-gray-600">{room.location}</td>
-                      <td className="p-4 text-gray-600">{room.capacity}</td>
-                      <td className="p-4 text-gray-600">
-                        <button
-                          onClick={() => setShowResourcesPopup(room)}
-                          className="text-blue-600 hover:text-blue-800 flex items-center transition-colors duration-200"
-                        >
-                          <EyeIcon className="h-5 w-5 mr-1" />
-                          View
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <span className={getConditionClass(room.condition)}>{room.condition}</span>
-                      </td>
-                      <td className="p-4 text-gray-600">{room.department || 'Not Specified'}</td>
-                      <td className="p-4 text-gray-600">{room.addedBy}</td>
-                      <td className="p-4 text-gray-600">{room.email}</td>
-                      <td className="p-4">
-                        <button
-                          onClick={() => handleStatusClick(room, status)}
-                          className={getStatusStyle(status)}
-                          disabled={status === 'Under Maintenance'}
-                        >
-                          {getStatusIcon(status)} {status}
-                        </button>
-                      </td>
-                      <td className="p-4 flex space-x-3">
-                        <Link to={`/edit-lecture-room/${room._id}`}>
-                          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center space-x-2 shadow-sm hover:shadow-md">
-                            <PencilIcon className="h-4 w-4" />
-                            <span>Edit</span>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full bg-white rounded-xl border border-gray-200">
+                <thead className="bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider sticky top-0 z-10">
+                  <tr>
+                    <th className="p-4 text-left">Room Name</th>
+                    <th className="p-4 text-left">Location</th>
+                    <th className="p-4 text-left">Capacity</th>
+                    <th className="p-4 text-left">Room Type</th>
+                    <th className="p-4 text-left">Resources</th>
+                    <th className="p-4 text-left">Condition</th>
+                    <th className="p-4 text-left">Faculty</th>
+                    <th className="p-4 text-left">Added By</th>
+                    <th className="p-4 text-left">Email</th>
+                    <th className="p-4 text-left">Status</th>
+                    <th className="p-4 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lectureRooms.map((room, index) => {
+                    const status = getRoomStatus(room);
+                    const isTransparent = status === 'Occupied' || status === 'Under Maintenance';
+                    return (
+                      <tr
+                        key={room._id}
+                        className={`${
+                          index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                        } hover:bg-gray-100 transition-all duration-200 border-b border-gray-200 ${isTransparent ? 'opacity-60' : ''}`}
+                      >
+                        <td className="p-4 text-gray-800 font-medium max-w-[150px] truncate">{room.roomName}</td>
+                        <td className="p-4 text-gray-600 max-w-[150px] truncate">{room.location}</td>
+                        <td className="p-4 text-gray-600">{room.capacity}</td>
+                        <td className="p-4 text-gray-600 max-w-[150px] truncate">{room.room_type || 'Not Specified'}</td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => setShowResourcesPopup(room)}
+                            className="text-blue-600 hover:text-blue-800 flex items-center transition-all duration-200"
+                            aria-label="View resources"
+                          >
+                            <EyeIcon className="h-5 w-5 mr-1" />
+                            View
                           </button>
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteConfirm(room)}
-                          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium flex items-center space-x-2 shadow-sm hover:shadow-md"
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                          <span>Delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                        </td>
+                        <td className="p-4">
+                          <span className={getConditionClass(room.condition)}>{room.condition}</span>
+                        </td>
+                        <td className="p-4 text-gray-600 max-w-[150px] truncate">{room.faculty || 'Not Specified'}</td>
+                        <td className="p-4 text-gray-600 max-w-[150px] truncate">{room.addedBy}</td>
+                        <td className="p-4 text-gray-600 max-w-[200px] truncate">
+                          <a href={`mailto:${room.email}`} className="text-blue-600 hover:underline">{room.email}</a>
+                        </td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => handleStatusClick(room, status)}
+                            className={getStatusStyle(status)}
+                            disabled={status === 'Under Maintenance'}
+                            aria-label={`Room status: ${status}`}
+                          >
+                            {status}
+                          </button>
+                        </td>
+                        <td className="p-4 flex space-x-2">
+                          <div className="group relative">
+                            <Link to={`/edit-lecture-room/${room._id}`}>
+                              <button className="p-2 text-blue-600 hover:text-blue-800 transition-all duration-200" aria-label="Edit room">
+                                <PencilIcon className="h-5 w-5" />
+                              </button>
+                            </Link>
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2">Edit</span>
+                          </div>
+                          <div className="group relative">
+                            <button
+                              onClick={() => handleDeleteConfirm(room)}
+                              className="p-2 text-red-600 hover:text-red-800 transition-all duration-200"
+                              aria-label="Delete room"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded py-1 px-2">Delete</span>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Custom Animations */}
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes scale-in {
+          from { transform: scale(0.95); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
+        }
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 }

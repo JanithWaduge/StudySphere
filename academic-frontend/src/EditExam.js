@@ -17,9 +17,9 @@ const EditExam = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/view/${id}`)
+      .get(`http://localhost:5000/exam/view/${id}`)
       .then((res) => {
-        console.log("Response from backend:", res.data); // ✅ Check what’s really coming
+        console.log("Response from backend:", res.data);
         const exam = res.data.exam;
   
         if (!exam || !exam._id) {
@@ -53,7 +53,7 @@ const EditExam = () => {
     e.preventDefault();
 
     axios
-      .put(`http://localhost:5000/api/update/${id}`, examData)
+      .put(`http://localhost:5000/exam/update/${id}`, examData)
       .then(() => {
         alert("Exam updated successfully!");
         navigate("/view-all-exams");
@@ -119,6 +119,14 @@ const EditExam = () => {
           Update Exam
         </button>
       </form>
+
+      <button
+          type="button"
+          onClick={() => navigate('/view-all-exams')}
+          className="w-full mt-4 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700"
+        >
+          Back
+        </button>
     </div>
   );
 };

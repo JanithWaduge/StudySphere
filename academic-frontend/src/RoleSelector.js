@@ -35,18 +35,7 @@ function RoleSelector() {
             Student Register
           </button>
         </Link>
-
-        <Link to="/user/login">
-          <button className="w-full bg-white text-purple-600 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-100 transition duration-200">
-            User Login
-          </button>
-        </Link>
-
-        <Link to="/user/register">
-          <button className="w-full bg-white text-purple-600 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-purple-100 transition duration-200">
-            User Register
-          </button>
-        </Link>
+        
       </div>
     </div>
   );

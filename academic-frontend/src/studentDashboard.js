@@ -16,7 +16,7 @@ const StudentHome = () => {
 
   if (token) {
     const decoded = jwtDecode(token);
-    studentId = decoded.id;
+    studentId = decoded.studentId;
   }
 
   useEffect(() => {
@@ -44,16 +44,17 @@ const StudentHome = () => {
 
     useEffect(() => {
     axios
-      .get("http://localhost:5000/course/all")
-      .then((res) => setCourses(res.data.courses))
-      .catch((err) => console.error("Error fetching courses:", err));
+      .get("http://localhost:5000/course/courses")
+      .then((response) => setCourses(response.data.response))
+      
+      .catch((error) => console.error("Error fetching courses:", error));
   }, []);
 
   const handleEditDetails = () => navigate(`/student/edit/${studentId}`);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/student/login");
   };
 
   const handleEnrollNow = (course) => {
@@ -95,11 +96,12 @@ const StudentHome = () => {
 
       {student && (
         <div className="mx-10 mt-5">
-          <h2 className="text-left font-medium italic ">Welcome {student.name}</h2>
+          <h2 className="text-left text-lg font-medium italic">Welcome {student.name}...</h2>
         </div>
       )}
 
-      <nav className="flex gap-4 px-10 py-3 bg-gray-200">
+
+      <nav className="flex gap-4 mt-5 px-10 py-3 bg-gray-200">
         {['home', 'personal', 'enroll', 'time-table', 'exam'].map((section) => (
           <button
             key={section}
@@ -114,6 +116,7 @@ const StudentHome = () => {
           </button>
         ))}
       </nav>
+
 
       {selectedSection === "home" && (
         <div className="px-10 py-5">
@@ -150,6 +153,7 @@ const StudentHome = () => {
           </table>
         </div>
       )}
+
 
       {selectedSection === "personal" && student && (
         <div className="px-10 py-5">

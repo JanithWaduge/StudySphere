@@ -98,6 +98,13 @@ const StudentRegister = () => {
             Register
           </button>
 
+          <button
+          type="button"
+          onClick={() => navigate('/')}
+          className="w-full mt-5 py-2 bg-orange-600 text-white rounded-lg font-semibold text-lg hover:bg-orange-700 transition duration-200"
+        >
+          Go to Home
+        </button>
 
         </form>
       </div>

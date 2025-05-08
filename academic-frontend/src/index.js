@@ -28,6 +28,8 @@ import UserDashboard from './UserDashboard';
 import StudentLogin from './loginStudent';
 import StudentRegister from './registerStudent';
 import StudentDashboard from './studentDashboard';
+import StudentUserProfile from './studentUserProfile';
+import StudentUserProfileAdmin from './studentUserProfileAdmin';
 
 import CourseLecturerReport from './CourseLecturerReport';
 import AddExam from './addExam';
@@ -67,9 +69,12 @@ root.render(
         <Route path="/user/register" element={<UserRegister />} />
         <Route path="/user/dashboard" element={<UserDashboard />} />
         
+        
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/student/register" element={<StudentRegister />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/edit/:id" element={<StudentUserProfile />} />
+        <Route path="/admin/student/edit/:id" element={<StudentUserProfileAdmin />} />
 
         <Route path="/courselecreport" element={<CourseLecturerReport />} />
 

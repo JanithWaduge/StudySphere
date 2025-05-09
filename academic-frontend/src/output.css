@@ -42,6 +42,7 @@
     --color-blue-600: oklch(0.546 0.245 262.881);
     --color-blue-700: oklch(0.488 0.243 264.376);
     --color-blue-800: oklch(0.424 0.199 265.638);
+    --color-blue-900: oklch(0.28 0.14 265);
     --color-indigo-200: oklch(0.87 0.065 274.039);
     --color-purple-100: oklch(0.946 0.033 307.174);
     --color-purple-400: oklch(0.714 0.203 305.504);
@@ -58,6 +59,7 @@
     --color-gray-700: oklch(0.373 0.034 259.733);
     --color-gray-800: oklch(0.278 0.033 256.848);
     --color-gray-900: oklch(0.21 0.034 264.665);
+    --color-deep-charcoal: oklch(0.4517 0.0496 280.54);
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;

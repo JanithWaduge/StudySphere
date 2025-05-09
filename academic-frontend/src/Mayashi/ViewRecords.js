@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import debounce from 'lodash/debounce';
 import Alert from './Alert';
 import { EyeIcon, PencilIcon, TrashIcon, ClockIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 
@@ -19,6 +20,7 @@ function ViewRecords() {
   const [searchError, setSearchError] = useState('');
   const [showResourcesPopup, setShowResourcesPopup] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [deletedRoomName, setDeletedRoomName] = useState('');
   const searchRef = useRef(null);
@@ -44,9 +46,14 @@ function ViewRecords() {
     setIsLoading(true);
     try {
       const response = await axios.get('http://localhost:5000/api/lecture-rooms');
-      console.log('Fetched Lecture Rooms:', response.data);
-      setLectureRooms(response.data);
-      setFilteredRooms(response.data);
+      const rooms = response.data.map((room) => ({
+        ...room,
+        available_equipments: Array.isArray(room.available_equipments)
+          ? room.available_equipments
+          : [],
+      }));
+      setLectureRooms(rooms);
+      setFilteredRooms(rooms);
     } catch (error) {
       setAlert({ message: 'Failed to fetch lecture rooms', type: 'error' });
       console.error('Error fetching lecture rooms:', error);
@@ -134,47 +141,62 @@ function ViewRecords() {
   };
 
   const saveSearchQuery = (query) => {
-    if (!query.trim()) return;
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return;
     const updatedSearches = [
-      query,
-      ...recentSearches.filter((q) => q !== query),
+      trimmedQuery,
+      ...recentSearches.filter((q) => q !== trimmedQuery),
     ].slice(0, 5);
     setRecentSearches(updatedSearches);
     localStorage.setItem('recentSearches', JSON.stringify(updatedSearches));
   };
 
-  const handleSearch = (query = searchQuery) => {
-    if (!query.trim()) {
+  const handleSearch = async (query = searchQuery) => {
+    const sanitizedQuery = query.replace(/\s+/g, ' ').trim();
+    if (!sanitizedQuery) {
       setFilteredRooms(lectureRooms);
       setShowCardView(false);
       setSearchError('');
       setShowRecentSearches(false);
+      setIsSearching(false);
       return;
     }
-    saveSearchQuery(query);
-    const searchTerm = query.toLowerCase().trim();
+
+    setIsSearching(true);
+    saveSearchQuery(sanitizedQuery);
+    const searchTerms = sanitizedQuery
+      .toLowerCase()
+      .split(',')
+      .map((term) => term.trim())
+      .filter((term) => term);
+
     const filtered = lectureRooms.filter((room) => {
-      if (room.roomName.toLowerCase().includes(searchTerm)) return true;
-      if (room.location.toLowerCase().includes(searchTerm)) return true;
+      const matchesTerm = (value) =>
+        value &&
+        searchTerms.some((term) => value.toLowerCase().includes(term));
+
+      if (matchesTerm(room.roomName)) return true;
+      if (matchesTerm(room.location)) return true;
+      if (matchesTerm(room.seating_type)) return true;
+      if (matchesTerm(room.condition)) return true;
+      if (matchesTerm(room.faculty)) return true;
+      if (matchesTerm(room.addedBy)) return true;
+      if (matchesTerm(room.email)) return true;
+      if (matchesTerm(room.room_type)) return true; // Added room_type search
+
+      if (searchTerms.includes('air conditioning') && room.air_conditioning) return true;
+      if (searchTerms.includes('ac') && room.air_conditioning) return true;
+
       const equipments = Array.isArray(room.available_equipments)
-        ? room.available_equipments.map((equipment) => equipment.toLowerCase())
+        ? room.available_equipments.map((e) => e.toLowerCase())
         : [];
-      const queryEquipments = searchTerm.split(',').map((q) => q.trim());
-      if (queryEquipments.length > 1) {
-        return queryEquipments.every((q) => equipments.includes(q));
-      } else {
-        if (equipments.includes(searchTerm)) return true;
-      }
-      if (room.seating_type.toLowerCase().includes(searchTerm)) return true;
-      if (searchTerm === 'air conditioning' && room.air_conditioning) return true;
-      if (room.condition.toLowerCase().includes(searchTerm)) return true;
-      if (room.faculty && room.faculty.toLowerCase().includes(searchTerm)) return true;
-      if (room.addedBy.toLowerCase().includes(searchTerm)) return true;
-      if (room.email.toLowerCase().includes(searchTerm)) return true;
+      if (equipments.some((equipment) => searchTerms.some((term) => equipment.includes(term)))) return true;
+
       return false;
     });
+
     if (filtered.length === 0) {
-      setSearchError('No results found for your search.');
+      setSearchError('No results found. Try refining your search terms.');
       setShowCardView(false);
     } else {
       setFilteredRooms(filtered);
@@ -182,6 +204,20 @@ function ViewRecords() {
       setSearchError('');
     }
     setShowRecentSearches(false);
+    setIsSearching(false);
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      handleSearch(query);
+    }, 300),
+    [lectureRooms]
+  );
+
+  const handleSearchInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
   };
 
   const handleKeyPress = (e) => {
@@ -247,13 +283,13 @@ function ViewRecords() {
       <header className="sticky top-0 z-10 bg-white shadow-md py-4 px-6">
         <div className="container mx-auto max-w-7xl flex justify-between items-center">
           <div>
-          <h1 className="text-4xl font-extrabold text-gray-800 text-center tracking-tight">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
-            Rooms & Resources Management
-          </span>
-        </h1> 
+            <h1 className="text-4xl font-extrabold text-gray-800 text-center tracking-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+                Rooms & Resources Management
+              </span>
+            </h1>
             <nav className="text-sm text-gray-600">
-              <Link to="/admin/dashboard" className="hover:text-orange-600">Dashboard</Link>  <span>Lecture Rooms</span>
+              <Link to="/admin/dashboard" className="hover:text-orange-600">Dashboard</Link> <span>Lecture Rooms</span>
             </nav>
           </div>
           <button
@@ -277,7 +313,7 @@ function ViewRecords() {
                 type="text"
                 placeholder="Search by room name, location, faculty, etc."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleSearchInputChange}
                 onFocus={() => setShowRecentSearches(true)}
                 onKeyPress={handleKeyPress}
                 className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-gray-50 text-gray-900 placeholder-gray-500"
@@ -328,6 +364,11 @@ function ViewRecords() {
               Search
             </button>
           </div>
+          {isSearching && (
+            <div className="flex justify-center mt-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-orange-500 border-solid"></div>
+            </div>
+          )}
           {searchError && (
             <p className="text-red-600 text-sm mt-4 text-center">{searchError}</p>
           )}
@@ -432,11 +473,11 @@ function ViewRecords() {
 
         {/* Main Content Card */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6">
-  <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
-    Room Records
-  </span>
-</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700">
+              Room Records
+            </span>
+          </h2>
 
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
@@ -522,7 +563,7 @@ function ViewRecords() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full bg-white rounded-xl border border-gray-200">
+              <table className="w-full bg-orange-600 rounded-xl border border-gray-200">
                 <thead className="bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider sticky top-0 z-10">
                   <tr>
                     <th className="p-4 text-left">Room Name</th>

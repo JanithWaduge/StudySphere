@@ -25,6 +25,7 @@ function EditLectureRoom() {
     addedBy: '',
     email: '',
     faculty: '',
+    condition: '',
     utilization: 0,
     updatedAt: '',
   });
@@ -35,6 +36,7 @@ function EditLectureRoom() {
     power_outlets: '',
     addedBy: '',
     email: '',
+    condition: '',
     quantity: {
       Projectors: '',
       Whiteboard: '',
@@ -54,6 +56,7 @@ function EditLectureRoom() {
         setFormData({
           ...data,
           faculty: data.faculty || '',
+          condition: data.condition || '',
           available_equipments: data.available_equipments || [],
           quantity: data.quantity || {
             Projectors: 0,
@@ -302,6 +305,7 @@ function EditLectureRoom() {
       'addedBy',
       'email',
       'faculty',
+      'condition',
     ];
     for (const field of requiredFields) {
       if (!formData[field]) {
@@ -581,6 +585,25 @@ function EditLectureRoom() {
               <option value="Business">Business</option>
               <option value="Arts">Arts</option>
             </select>
+          </div>
+          <div className="mb-6">
+            <label className="block text-gray-800 font-semibold mb-2 text-lg">Condition</label>
+            <select
+              name="condition"
+              value={formData.condition}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8C66] focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md"
+              required
+            >
+              <option value="">Select Condition</option>
+              <option value="Excellent">Excellent</option>
+              <option value="Good">Good</option>
+              <option value="Needs to Repair">Needs to Repair</option>
+            </select>
+            {validationMessages.condition && (
+              <p className="text-sm text-red-600 mt-1">{validationMessages.condition}</p>
+            )}
           </div>
           <div className="mb-6">
             <label className="block text-gray-800 font-semibold mb-2 text-lg">Added By (Full Name)</label>

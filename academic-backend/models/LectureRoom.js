@@ -67,7 +67,7 @@ const lectureRoomSchema = new mongoose.Schema({
     required: true,
     enum: ['Excellent', 'Good', 'Needs to Repair'], // Dropdown options for condition
   },
-  department: {
+  faculty: {
     type: String,
     required: true, // Stores the selected department or custom department name if "Other" is chosen
   },

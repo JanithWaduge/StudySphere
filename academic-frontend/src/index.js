@@ -36,6 +36,11 @@ import AddExam from './addExam';
 import ViewAllExams from './viewAllExams';
 import AddLectureRoom from './Mayashi/AddLectureRoom';
 import ViewRecords from './Mayashi/ViewRecords';
+import EditLectureRoom from './Mayashi/EditLectureRoom';
+import AddSchedule from './Mayashi/AddSchedule';
+import ViewSchedules from './Mayashi/ViewSchedules';
+import EditSchedule from './Mayashi/EditSchedule';
+import RoomUtilizationReport from './Mayashi/RoomUtilizationReport';
 
 
 
@@ -53,6 +58,12 @@ root.render(
         <Route path='/view-all-exams' element={<ViewAllExams />} />
         <Route path='/add-lecture-room' element={<AddLectureRoom />} />
         <Route path='/view-records' element={<ViewRecords />} />
+        <Route path="/edit-lecture-room/:id" element={<EditLectureRoom />} />
+        <Route path="/add-schedule" element={<AddSchedule />} />
+        <Route path="/view-schedules" element={<ViewSchedules />} />
+        <Route path="/edit-schedule/:id" element={<EditSchedule />} />
+        <Route path="/room-utilization-report" element={<RoomUtilizationReport />} />
+
        
         <Route path="/reports" element={<Reports />} />
         <Route path="/add-lecturer" element={<LecturerFormPage />} />

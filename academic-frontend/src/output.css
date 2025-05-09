@@ -1660,9 +1660,6 @@
   .bg-\[color\:\#F5F5F5\] {
     background-color: #F5F5F5;
   }
-  .bg-\[color\:\#FFB300\] {
-    background-color: #FFB300;
-  }
   .bg-black {
     background-color: var(--color-black);
   }
@@ -2373,9 +2370,6 @@
   .text-\[color\:\#EF5350\] {
     color: #EF5350;
   }
-  .text-\[color\:\#FFD700\] {
-    color: #FFD700;
-  }
   .text-black {
     color: var(--color-black);
   }
@@ -3027,13 +3021,6 @@
     &:hover {
       @media (hover: hover) {
         background-color: #2c3e50;
-      }
-    }
-  }
-  .hover\:bg-\[color\:\#FF4500\] {
-    &:hover {
-      @media (hover: hover) {
-        background-color: #FF4500;
       }
     }
   }

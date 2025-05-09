@@ -54,16 +54,9 @@ const StudentHome = () => {
     axios
 
 
-
-
-
       .get("http://localhost:5000/course/all")
 
       .get("http://localhost:5000/api/courses")
-
-
-
-
 
       .get("http://localhost:5000/course/all")
 

@@ -269,22 +269,7 @@ const StudentHome = () => {
                 <th className="p-3 border bg-orange-700">Exam Location</th>
               </tr>
             </thead>
-            <tbody>
-              {exams.length === 0 ? (
-                <tr><td colSpan="4" className="text-center py-4">No exams scheduled.</td></tr>
-              ) : (
-                exams.map((exam, index) => (
-                  <tr key={index} className="hover:bg-orange-50">
-                    <td className="p-3 border text-center">{exam.code}</td>
-                    <td className="p-3 border text-center">{exam.examName}</td>
-                    <td className="p-3 border text-center">
-                      {new Date(exam.examDate).toLocaleDateString()} at XX.XX
-                    </td>
-                    <td className="p-3 border text-center">XX</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
+           
           </table>
         </div>
       )}

@@ -752,6 +752,9 @@
   .w-3 {
     width: calc(var(--spacing) * 3);
   }
+  .w-3\/4 {
+    width: calc(3/4 * 100%);
+  }
   .w-4 {
     width: calc(var(--spacing) * 4);
   }
@@ -1650,6 +1653,9 @@
   }
   .bg-\[\#FF8C66\] {
     background-color: #FF8C66;
+  }
+  .bg-\[color\:\#34495E\] {
+    background-color: #34495E;
   }
   .bg-\[color\:\#F5F5F5\] {
     background-color: #F5F5F5;
@@ -2982,6 +2988,14 @@
       background-color: var(--color-gray-100);
     }
   }
+  .hover\:-translate-y-1 {
+    &:hover {
+      @media (hover: hover) {
+        --tw-translate-y: calc(var(--spacing) * -1);
+        translate: var(--tw-translate-x) var(--tw-translate-y);
+      }
+    }
+  }
   .hover\:scale-105 {
     &:hover {
       @media (hover: hover) {
@@ -3006,6 +3020,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: #FF7043;
+      }
+    }
+  }
+  .hover\:bg-\[color\:\#2c3e50\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #2c3e50;
       }
     }
   }
@@ -3207,6 +3228,13 @@
       }
     }
   }
+  .hover\:text-green-200 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-green-200);
+      }
+    }
+  }
   .hover\:text-orange-600 {
     &:hover {
       @media (hover: hover) {
@@ -3343,9 +3371,37 @@
       outline-style: none;
     }
   }
+  .sm\:w-3\/4 {
+    @media (width >= 40rem) {
+      width: calc(3/4 * 100%);
+    }
+  }
   .sm\:grid-cols-2 {
     @media (width >= 40rem) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .sm\:flex-row {
+    @media (width >= 40rem) {
+      flex-direction: row;
+    }
+  }
+  .sm\:space-y-0 {
+    @media (width >= 40rem) {
+      :where(& > :not(:last-child)) {
+        --tw-space-y-reverse: 0;
+        margin-block-start: calc(calc(var(--spacing) * 0) * var(--tw-space-y-reverse));
+        margin-block-end: calc(calc(var(--spacing) * 0) * calc(1 - var(--tw-space-y-reverse)));
+      }
+    }
+  }
+  .sm\:space-x-4 {
+    @media (width >= 40rem) {
+      :where(& > :not(:last-child)) {
+        --tw-space-x-reverse: 0;
+        margin-inline-start: calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));
+        margin-inline-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)));
+      }
     }
   }
   .sm\:px-6 {

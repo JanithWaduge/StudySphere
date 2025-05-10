@@ -1,170 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const Schedule = require('../models/Schedule'); // Adjust the path to your Schedule model
-const LectureRoom = require('../models/LectureRoom'); // Adjust the path to your LectureRoom model
-const PDFDocument = require('pdfkit'); // For PDF generation
+const {
+  getAllSchedules,
+  getScheduleById,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
+} = require('../controllers/scheduleController');
 
-// GET all schedules
-router.get('/', async (req, res) => {
-  try {
-    const schedules = await Schedule.find();
-    res.status(200).json(schedules);
-  } catch (error) {
-    console.error('Error fetching schedules:', error);
-    res.status(500).json({ message: 'Error fetching schedules', error: error.message });
-  }
-});
+// Get all schedules
+router.get('/', getAllSchedules);
 
-// GET a single schedule by _id
-router.get('/:id', async (req, res) => {
-  try {
-    const schedule = await Schedule.findById(req.params.id);
-    if (!schedule) {
-      return res.status(404).json({ message: 'Schedule not found' });
-    }
-    res.status(200).json(schedule);
-  } catch (error) {
-    console.error('Error fetching schedule:', error);
-    res.status(500).json({ message: 'Error fetching schedule', error: error.message });
-  }
-});
+// Get a single schedule by ID
+router.get('/:id', getScheduleById);
 
-// POST a new schedule
-router.post('/', async (req, res) => {
-  try {
-    const {
-      roomName,
-      eventType,
-      customEventType,
-      eventName,
-      faculty,
-      department,
-      date,
-      startTime,
-      duration,
-      recurrence,
-      recurrenceFrequency,
-      priorityLevel,
-      createdBy,
-      email,
-    } = req.body;
+// Create a new schedule
+router.post('/', createSchedule);
 
-    const room = await LectureRoom.findOne({ roomName });
-    if (!room) {
-      return res.status(400).json({ message: `Room ${roomName} does not exist` });
-    }
+// Update a schedule
+router.put('/:id', updateSchedule);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(date);
-    if (selectedDate < today) {
-      return res.status(400).json({ message: 'Date cannot be in the past' });
-    }
-
-    const scheduleData = {
-      roomName,
-      eventType,
-      customEventType: eventType === 'Other' ? customEventType : undefined,
-      eventName,
-      faculty,
-      department,
-      date: new Date(date),
-      startTime,
-      duration: parseInt(duration, 10),
-      recurrence,
-      recurrenceFrequency: recurrence === 'Yes' ? recurrenceFrequency : undefined,
-      priorityLevel,
-      createdBy,
-      email,
-    };
-
-    const newSchedule = new Schedule(scheduleData);
-    await newSchedule.save();
-    res.status(201).json({ message: 'Schedule created successfully', schedule: newSchedule });
-  } catch (error) {
-    console.error('Error creating schedule:', error);
-    res.status(400).json({ message: 'Error creating schedule', error: error.message });
-  }
-});
-
-// PUT (update) a schedule by _id
-router.put('/:id', async (req, res) => {
-  try {
-    const {
-      roomName,
-      eventType,
-      customEventType,
-      eventName,
-      faculty,
-      department,
-      date,
-      startTime,
-      duration,
-      recurrence,
-      recurrenceFrequency,
-      priorityLevel,
-      createdBy,
-      email,
-    } = req.body;
-
-    const room = await LectureRoom.findOne({ roomName });
-    if (!room) {
-      return res.status(400).json({ message: `Room ${roomName} does not exist` });
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selectedDate = new Date(date);
-    if (selectedDate < today) {
-      return res.status(400).json({ message: 'Date cannot be in the past' });
-    }
-
-    const updatedSchedule = await Schedule.findByIdAndUpdate(
-      req.params.id,
-      {
-        roomName,
-        eventType,
-        customEventType: eventType === 'Other' ? customEventType : undefined,
-        eventName,
-        faculty,
-        department,
-        date: new Date(date),
-        startTime,
-        duration: parseInt(duration, 10),
-        recurrence,
-        recurrenceFrequency: recurrence === 'Yes' ? recurrenceFrequency : undefined,
-        priorityLevel,
-        createdBy,
-        email,
-      },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedSchedule) {
-      return res.status(404).json({ message: 'Schedule not found' });
-    }
-
-    res.status(200).json({ message: 'Schedule updated successfully', schedule: updatedSchedule });
-  } catch (error) {
-    console.error('Error updating schedule:', error);
-    res.status(400).json({ message: 'Error updating schedule', error: error.message });
-  }
-});
-
-// DELETE a schedule by _id
-router.delete('/:id', async (req, res) => {
-  try {
-    const deletedSchedule = await Schedule.findByIdAndDelete(req.params.id);
-    if (!deletedSchedule) {
-      return res.status(404).json({ message: 'Schedule not found' });
-    }
-    res.status(200).json({ message: 'Schedule deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting schedule:', error);
-    res.status(500).json({ message: 'Error deleting schedule', error: error.message });
-  }
-});
-
-
+// Delete a schedule
+router.delete('/:id', deleteSchedule);
 
 module.exports = router;

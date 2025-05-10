@@ -615,54 +615,131 @@ function AddLectureRoom() {
           </button>
         </form>
         {showConfirmation && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Confirm Lecture Room Details</h2>
-              <div className="mb-4">
-                <p><strong>Room Name:</strong> {formData.roomName}</p>
-                <p><strong>Location:</strong> {formData.location}</p>
-                <p><strong>Capacity:</strong> {formData.capacity}</p>
-                <p><strong>Room Type:</strong> {formData.room_type}</p>
-                <h3 className="text-xl font-semibold text-gray-800 mt-4">Resources</h3>
-                <p><strong>Available Equipment:</strong> {formData.available_equipments.length > 0 ? formData.available_equipments.join(', ') : 'None'}</p>
-                {formData.available_equipments.length > 0 && (
-                  <div className="ml-4">
-                    {formData.available_equipments
-                      .filter((resource) => resource !== 'Audio System')
-                      .map((resource) => (
-                        <p key={resource}>
-                          <strong>{resource} Quantity:</strong> {formData.quantity[resource]}
-                        </p>
-                      ))}
-                  </div>
-                )}
-                <p><strong>Seating Type:</strong> {formData.seating_type}</p>
-                <p><strong>Air Conditioning:</strong> {formData.air_conditioning ? 'Yes' : 'No'}</p>
-                <p><strong>Power Outlets:</strong> {formData.power_outlets}</p>
-                <p><strong>Condition:</strong> {formData.condition}</p>
-                <p><strong>Faculty:</strong> {formData.faculty}</p>
-                <p><strong>Added By:</strong> {formData.addedBy}</p>
-                <p><strong>Email:</strong> {formData.email}</p>
-              </div>
-              <p className="text-lg font-medium text-gray-800 mb-4">Confirm the details?</p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={confirmSubmission}
-                  className="bg-[#FF8C66] text-white py-2 px-4 rounded-lg hover:bg-[#FF7043] transition-colors duration-200"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={cancelSubmission}
-                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-400 transition-colors duration-200"
-                >
-                  No
-                </button>
-              </div>
-            </div>
+  <div className="confirmation-overlay">
+    <div className="confirmation-modal">
+      <h2>Confirm Lecture Room Details</h2>
+      <div className="modal-details">
+        <p><strong>Room Name:</strong> {formData.roomName}</p>
+        <p><strong>Location:</strong> {formData.location}</p>
+        <p><strong>Capacity:</strong> {formData.capacity}</p>
+        <p><strong>Room Type:</strong> {formData.room_type}</p>
+        <h3>Resources</h3>
+        <p><strong>Available Equipment:</strong> {formData.available_equipments.length > 0 ? formData.available_equipments.join(', ') : 'None'}</p>
+        {formData.available_equipments.length > 0 && (
+          <div className="equipment-details">
+            {formData.available_equipments
+              .filter((resource) => resource !== 'Audio System')
+              .map((resource) => (
+                <p key={resource}>
+                  <strong>{resource} Quantity:</strong> {formData.quantity[resource]}
+                </p>
+              ))}
           </div>
         )}
+        <p><strong>Seating Type:</strong> {formData.seating_type}</p>
+        <p><strong>Air Conditioning:</strong> {formData.air_conditioning ? 'Yes' : 'No'}</p>
+        <p><strong>Power Outlets:</strong> {formData.power_outlets}</p>
+        <p><strong>Condition:</strong> {formData.condition}</p>
+        <p><strong>Faculty:</strong> {formData.faculty}</p>
+        <p><strong>Added By:</strong> {formData.addedBy}</p>
+        <p><strong>Email:</strong> {formData.email}</p>
       </div>
+      <p className="confirm-prompt">Confirm the details?</p>
+      <div className="modal-actions">
+        <button onClick={confirmSubmission} className="confirm-button">Yes</button>
+        <button onClick={cancelSubmission} className="cancel-button">No</button>
+      </div>
+    </div>
+  </div>
+)}
+      </div>
+      <style jsx>{`
+.confirmation-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.confirmation-modal {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.confirmation-modal h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.confirmation-modal h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.modal-details p {
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.equipment-details {
+  margin-left: 16px;
+}
+
+.confirm-prompt {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 20px 0 16px;
+  color: #333;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.confirm-button {
+  background-color: #FF8C66;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.confirm-button:hover {
+  background-color: #FF7043;
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: #cfcfcf;
+}
+
+      `}</style>
     </div>
   );
 }

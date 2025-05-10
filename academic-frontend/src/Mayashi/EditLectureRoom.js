@@ -376,33 +376,21 @@ function EditLectureRoom() {
       <div className="relative z-10 container mx-auto px-4">
         {alert && <Alert message={alert.message} type={alert.type} onClose={() => setAlert(null)} />}
         {showConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                Confirm Update
-              </h2>
-              <p className="text-gray-800 mb-6">
-                Are you sure you want to update the{' '}
-                <span className="font-bold text-[#FF8C66]">{formData.roomName}</span>{' '}
-                Lecture Room Record?
-              </p>
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={handleCancelUpdate}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
-                >
-                  No
-                </button>
-                <button
-                  onClick={handleConfirmUpdate}
-                  className="bg-[#FF8C66] text-white px-4 py-2 rounded-lg hover:bg-[#FF7043] transition-colors"
-                >
-                  Yes
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+  <div className="confirm-overlay">
+    <div className="confirm-modal">
+      <h2>Confirm Update</h2>
+      <p>
+        Are you sure you want to update the{' '}
+        <span className="highlighted-text">{formData.roomName}</span> Lecture Room Record?
+      </p>
+      <div className="modal-actions">
+        <button onClick={handleCancelUpdate} className="cancel-button">No</button>
+        <button onClick={handleConfirmUpdate} className="confirm-button">Yes</button>
+      </div>
+    </div>
+  </div>
+)}
+
         <h1 className="text-4xl font-bold text-orange-700 text-center mb-10 drop-shadow-lg">
           Edit Lecture Room
         </h1>
@@ -651,6 +639,79 @@ function EditLectureRoom() {
           </button>
         </form>
       </div>
+      <style jsx>{`
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.confirm-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-modal h2 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.confirm-modal p {
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.highlighted-text {
+  font-weight: bold;
+  color: #FF8C66;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #cfcfcf;
+}
+
+.confirm-button {
+  background-color: #FF8C66;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirm-button:hover {
+  background-color: #FF7043;
+}
+
+
+      `}</style>
     </div>
   );
 }

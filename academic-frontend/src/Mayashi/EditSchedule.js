@@ -431,47 +431,38 @@ function EditSchedule() {
         </div>
       )}
 
-      {/* Confirmation Popup */}
-      {showConfirmation && confirmationDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Confirm Updated Schedule Details</h2>
-            <div className="space-y-2 text-gray-700">
-              <p><strong>Room Name:</strong> {confirmationDetails.roomName}</p>
-              <p><strong>Event Type:</strong> {confirmationDetails.eventType}</p>
-              <p><strong>Event Name:</strong> {confirmationDetails.eventName}</p>
-              <p><strong>Faculty:</strong> {confirmationDetails.faculty}</p>
-              <p><strong>Department:</strong> {confirmationDetails.department}</p>
-              <p><strong>Date:</strong> {confirmationDetails.date}</p>
-              <p><strong>Start Time:</strong> {confirmationDetails.startTime}</p>
-              <p><strong>Duration:</strong> {confirmationDetails.duration} minutes</p>
-              <p><strong>End Time:</strong> {confirmationDetails.endTime}</p>
-              <p><strong>Recurrence:</strong> {confirmationDetails.recurrence}</p>
-              <p><strong>Recurrence Frequency:</strong> {confirmationDetails.recurrenceFrequency}</p>
-              <p><strong>Priority Level:</strong> {confirmationDetails.priorityLevel}</p>
-              <p><strong>Status:</strong> {confirmationDetails.status}</p>
-              <p><strong>Created By:</strong> {confirmationDetails.createdBy}</p>
-              <p><strong>Email:</strong> {confirmationDetails.email}</p>
-              <p><strong>Updated At:</strong> {new Date(confirmationDetails.updatedAt).toLocaleString()}</p>
-            </div>
-            <p className="mt-4 font-semibold text-gray-900">Confirm the updated details?</p>
-            <div className="flex justify-end space-x-4 mt-6">
-              <button
-                onClick={handleCancel}
-                className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
-              >
-                No
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+{/* Confirmation Popup */}
+{showConfirmation && confirmationDetails && (
+  <div className="modal-overlay">
+    <div className="modal-box" role="dialog" aria-label="Confirm updated schedule">
+      <h2 className="modal-title">Confirm Updated Schedule Details</h2>
+      <div className="modal-details">
+        <p><strong>Room Name:</strong> {confirmationDetails.roomName}</p>
+        <p><strong>Event Type:</strong> {confirmationDetails.eventType}</p>
+        <p><strong>Event Name:</strong> {confirmationDetails.eventName}</p>
+        <p><strong>Faculty:</strong> {confirmationDetails.faculty}</p>
+        <p><strong>Department:</strong> {confirmationDetails.department}</p>
+        <p><strong>Date:</strong> {confirmationDetails.date}</p>
+        <p><strong>Start Time:</strong> {confirmationDetails.startTime}</p>
+        <p><strong>Duration:</strong> {confirmationDetails.duration} minutes</p>
+        <p><strong>End Time:</strong> {confirmationDetails.endTime}</p>
+        <p><strong>Recurrence:</strong> {confirmationDetails.recurrence}</p>
+        <p><strong>Recurrence Frequency:</strong> {confirmationDetails.recurrenceFrequency}</p>
+        <p><strong>Priority Level:</strong> {confirmationDetails.priorityLevel}</p>
+        <p><strong>Status:</strong> {confirmationDetails.status}</p>
+        <p><strong>Created By:</strong> {confirmationDetails.createdBy}</p>
+        <p><strong>Email:</strong> {confirmationDetails.email}</p>
+        <p><strong>Updated At:</strong> {new Date(confirmationDetails.updatedAt).toLocaleString()}</p>
+      </div>
+      <p className="modal-confirm-text">Confirm the updated details?</p>
+      <div className="modal-actions">
+        <button onClick={handleCancel} className="btn btn-cancel">No</button>
+        <button onClick={handleConfirm} className="btn btn-confirm">Yes</button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Form */}
       <div className="container mx-auto max-w-2xl bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg">
@@ -858,6 +849,98 @@ function EditSchedule() {
           </div>
         </form>
       </div>
+      <style jsx>{`
+      .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-box {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+  max-width: 600px;
+  width: 100%;
+  animation: scaleIn 0.25s ease;
+  border: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.modal-details {
+  color: #374151;
+  margin-bottom: 1.5rem;
+}
+
+.modal-details p {
+  margin-bottom: 0.5rem;
+}
+
+.modal-confirm-text {
+  font-weight: 600;
+  color: #1f2937;
+  margin-top: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-cancel {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.btn-cancel:hover {
+  background-color: #d1d5db;
+}
+
+.btn-confirm {
+  background-color: #16a34a;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background-color: #15803d;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+      `}</style>
     </div>
   );
 }

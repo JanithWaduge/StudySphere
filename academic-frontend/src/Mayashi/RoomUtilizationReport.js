@@ -476,19 +476,19 @@ const RoomUtilizationReport = () => {
         <div className="flex justify-center space-x-6">
           <button
             onClick={() => downloadReport('pdf')}
-            className="bg-[color:#FFB300] text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
+            className="bg-yellow-400 text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
           >
             Download PDF
           </button>
           <button
             onClick={() => downloadReport('csv')}
-            className="bg-[color:#FFB300] text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
+            className="bg-yellow-400 text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
           >
             Download CSV
           </button>
           <button
             onClick={() => downloadReport('json')}
-            className="bg-[color:#FFB300] text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
+            className="bg-yellow-400 text-[color:#34495E] px-6 py-2 rounded-lg hover:bg-[color:#FF4500] transition-colors shadow-md font-bold"
           >
             Download JSON
           </button>

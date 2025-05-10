@@ -58,7 +58,6 @@ const StudentHome = () => {
 
       .get("http://localhost:5000/api/courses")
 
-
       .get("http://localhost:5000/course/all")
 
       .then((res) => setCourses(res.data.courses))

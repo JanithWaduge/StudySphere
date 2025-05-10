@@ -414,47 +414,37 @@ function AddSchedule() {
         </div>
       )}
 
-      {/* Confirmation Popup */}
-      {showConfirmation && confirmationDetails && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-200">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Confirm Schedule Details</h2>
-            <div className="space-y-2 text-gray-700">
-              <p><strong>Room Name:</strong> {confirmationDetails.roomName}</p>
-              <p><strong>Event Type:</strong> {confirmationDetails.eventType}</p>
-              <p><strong>Event Name:</strong> {confirmationDetails.eventName}</p>
-              <p><strong>Faculty:</strong> {confirmationDetails.faculty}</p>
-              <p><strong>Department:</strong> {confirmationDetails.department}</p>
-              <p><strong>Date:</strong> {confirmationDetails.date}</p>
-              <p><strong>Start Time:</strong> {confirmationDetails.startTime}</p>
-              <p><strong>Duration:</strong> {confirmationDetails.duration} minutes</p>
-              <p><strong>End Time:</strong> {confirmationDetails.endTime}</p>
-              <p><strong>Recurrence:</strong> {confirmationDetails.recurrence}</p>
-              <p><strong>Recurrence Frequency:</strong> {confirmationDetails.recurrenceFrequency}</p>
-              <p><strong>Priority Level:</strong> {confirmationDetails.priorityLevel}</p>
-              <p><strong>Status:</strong> {confirmationDetails.status}</p>
-              <p><strong>Created By:</strong> {confirmationDetails.createdBy}</p>
-              <p><strong>Email:</strong> {confirmationDetails.email}</p>
-              <p><strong>Created At:</strong> {new Date(confirmationDetails.createdAt).toLocaleString()}</p>
-            </div>
-            <p className="mt-4 font-semibold text-gray-900">Confirm the details?</p>
-            <div className="flex justify-end space-x-4 mt-6">
-              <button
-                onClick={handleCancel}
-                className="bg-gray-200 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium"
-              >
-                No
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
-              >
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+     {/* Confirmation Popup */}
+{showConfirmation && confirmationDetails && (
+  <div className="schedule-confirmation-overlay">
+    <div className="schedule-confirmation-modal">
+      <h2>Confirm Schedule Details</h2>
+      <div className="modal-details">
+        <p><strong>Room Name:</strong> {confirmationDetails.roomName}</p>
+        <p><strong>Event Type:</strong> {confirmationDetails.eventType}</p>
+        <p><strong>Event Name:</strong> {confirmationDetails.eventName}</p>
+        <p><strong>Faculty:</strong> {confirmationDetails.faculty}</p>
+        <p><strong>Department:</strong> {confirmationDetails.department}</p>
+        <p><strong>Date:</strong> {confirmationDetails.date}</p>
+        <p><strong>Start Time:</strong> {confirmationDetails.startTime}</p>
+        <p><strong>Duration:</strong> {confirmationDetails.duration} minutes</p>
+        <p><strong>End Time:</strong> {confirmationDetails.endTime}</p>
+        <p><strong>Recurrence:</strong> {confirmationDetails.recurrence}</p>
+        <p><strong>Recurrence Frequency:</strong> {confirmationDetails.recurrenceFrequency}</p>
+        <p><strong>Priority Level:</strong> {confirmationDetails.priorityLevel}</p>
+        <p><strong>Status:</strong> {confirmationDetails.status}</p>
+        <p><strong>Created By:</strong> {confirmationDetails.createdBy}</p>
+        <p><strong>Email:</strong> {confirmationDetails.email}</p>
+        <p><strong>Created At:</strong> {new Date(confirmationDetails.createdAt).toLocaleString()}</p>
+      </div>
+      <p className="confirm-prompt">Confirm the details?</p>
+      <div className="modal-actions">
+        <button onClick={handleCancel} className="cancel-button">No</button>
+        <button onClick={handleConfirm} className="confirm-button">Yes</button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Form */}
       <div className="container mx-auto max-w-2xl bg-white bg-opacity-90 p-8 rounded-2xl shadow-lg">
@@ -876,6 +866,83 @@ function AddSchedule() {
           </div>
         </form>
       </div>
+      <style jsx>{`
+  .schedule-confirmation-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.schedule-confirmation-modal {
+  background-color: #fff;
+  padding: 32px;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid #ddd;
+}
+
+.schedule-confirmation-modal h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 16px;
+}
+
+.modal-details p {
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.confirm-prompt {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 24px 0 16px;
+  color: #222;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.confirm-button {
+  background-color: #2e7d32;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.confirm-button:hover {
+  background-color: #1b5e20;
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #333;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-button:hover {
+  background-color: #cfcfcf;
+}
+      `}</style>
     </div>
   );
 }

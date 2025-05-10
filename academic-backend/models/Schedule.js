@@ -71,9 +71,13 @@ const scheduleSchema = new mongoose.Schema({
   },
   department: {
     type: String,
+    enum: ['Computer Science', 'Information Technology', 'Software Engineering', 'Cyber Security','Data Science', 'Interactive Media', 
+      'Network Engineering', 'Civil Engineering', 'Mechanical Engineering', 'Electrical Engineering', 'Electronic Engineering', 
+      'Chemical Engineering', 'Mechatronics Engineering','Bio Medical Engineering', 'Mathematics','Physics', 'Chemistry', 'Biology','Microbiology', 
+      'Statistics', 'Accounting', 'Finance', 'Marketing', 'Human Resource Management', 'Management / Business Management','Economics', 'Creative & Performing Arts',
+      'Humanities & Social Sciences', 'Languages & Literature', 'Communication & Culture', 'Creative & Performing Arts', 'Other'],
     required: [true, 'Department is required'],
-    trim: true,
-    maxLength: [30, 'Department must not exceed 30 characters'],
+    
   },
   date: {
     type: Date,

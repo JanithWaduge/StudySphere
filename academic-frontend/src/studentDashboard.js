@@ -10,6 +10,7 @@ const StudentHome = () => {
   const [selectedSection, setSelectedSection] = useState("home");
   const [courses, setCourses] = useState([]);
   const [exams, setExams] = useState([]);
+  const [timetable, setTimetable] = useState([]);
 
   const token = localStorage.getItem("token");
   let studentId = null;
@@ -22,31 +23,48 @@ const StudentHome = () => {
   useEffect(() => {
     if (!studentId) return;
 
-    axios
-      .get(`http://localhost:5000/student/view/${studentId}`)
+    axios.get(`http://localhost:5000/student/view/${studentId}`)
       .then((res) => {
         const data = res.data.student || res.data.Student || res.data[0] || res.data;
         setStudent(data);
       })
       .catch((err) => console.error("Error fetching student info:", err));
 
-      axios
-      .get(`http://localhost:5000/enrollment/student-enrollments/${studentId}`)
+    axios.get(`http://localhost:5000/enrollment/student-enrollments/${studentId}`)
       .then((res) => setEnrollments(res.data))
       .catch((err) => console.error("Error fetching enrolled courses:", err));
 
-      axios
-        .get(`http://localhost:5000/exam/student-exams/${studentId}`)
-        .then((res) => setExams(res.data.exams || res.data))
-        .catch((err) => console.error("Error fetching exams:", err));
-    }, [studentId]);
+    axios.get(`http://localhost:5000/exam/student-exams/${studentId}`)
+      .then((res) => setExams(res.data.exams || res.data))
+      .catch((err) => console.error("Error fetching exams:", err));
+  }, [studentId]);
 
+  useEffect(() => {
+    if (enrollment.length === 0) return;
+  
+    axios.get("http://localhost:5000/api/timetable")
+      .then((res) => {
+        const allTimetables = res.data;
+        const studentCourses = enrollment.map((e) => e.courseName?.trim().toLowerCase());
+  
+        console.log("✅ All Timetables from backend:", allTimetables);
+        console.log("✅ Enrolled Courses:", studentCourses);
+  
+        const filtered = allTimetables.filter((t) =>
+          studentCourses.includes(t.eventName?.trim().toLowerCase())
+        );
+  
+        console.log("✅ Filtered Timetables:", filtered);
+  
+        setTimetable(filtered);
+      })
+      .catch((err) => console.error("❌ Error fetching timetable:", err));
+  }, [enrollment]);
+  
 
-    useEffect(() => {
-    axios
-      .get("http://localhost:5000/course/courses")
+  useEffect(() => {
+    axios.get("http://localhost:5000/course/courses")
       .then((response) => setCourses(response.data.response))
-      
       .catch((error) => console.error("Error fetching courses:", error));
   }, []);
 
@@ -64,11 +82,10 @@ const StudentHome = () => {
       code: course.code,
       courseName: course.name,
       studentId: studentId,
-      enrollmentDate: new Date()
+      enrollmentDate: new Date(),
     };
 
-    axios
-      .post("http://localhost:5000/enrollment/create", enrollmentData)
+    axios.post("http://localhost:5000/enrollment/create", enrollmentData)
       .then(() => {
         alert(`Enrolled in ${course.name} successfully!`);
         return axios.get(`http://localhost:5000/enrollment/student-enrollments/${studentId}`);
@@ -79,8 +96,6 @@ const StudentHome = () => {
         alert("Enrollment failed. Try again.");
       });
   };
-
-
 
   return (
     <div className="font-sans bg-gray-100 min-h-screen">
@@ -100,30 +115,30 @@ const StudentHome = () => {
         </div>
       )}
 
-
       <nav className="flex gap-4 mt-5 px-10 py-3 bg-gray-200">
-        {['home', 'personal', 'enroll', 'time-table', 'exam'].map((section) => (
+        {["home", "personal", "enroll", "time-table", "exam"].map((section) => (
           <button
             key={section}
-            className={`px-4 py-2 rounded-md font-medium ${selectedSection === section ? 'bg-yellow-400 text-black' : 'bg-orange-600 text-white hover:bg-orange-800'}`}
+            className={`px-4 py-2 rounded-md font-medium ${
+              selectedSection === section
+                ? "bg-yellow-400 text-black"
+                : "bg-orange-600 text-white hover:bg-orange-800"
+            }`}
             onClick={() => setSelectedSection(section)}
           >
-            {section === 'home' ? 'Home' :
-             section === 'personal' ? 'Personal Info' :
-             section === 'enroll' ? 'Enroll to New Course' :
-             section === 'time-table' ? 'Time Table' :
-             'Exams'}
+            {section === "home" ? "Home" :
+             section === "personal" ? "Personal Info" :
+             section === "enroll" ? "Enroll to New Course" :
+             section === "time-table" ? "Time Table" : "Exams"}
           </button>
         ))}
       </nav>
-
 
       {selectedSection === "home" && (
         <div className="px-10 py-5">
           <div className="mb-4 p-4 bg-green-100 border-l-4 border-green-600 text-green-700 font-medium rounded-md">
             Current Calendar Period Registration Details Only
           </div>
-
           <h3 className="mb-4 text-xl font-semibold text-gray-700">My Current Registered Courses</h3>
           <table className="w-full bg-white shadow-md border border-gray-300">
             <thead className="text-white">
@@ -153,7 +168,6 @@ const StudentHome = () => {
           </table>
         </div>
       )}
-
 
       {selectedSection === "personal" && student && (
         <div className="px-10 py-5">
@@ -219,21 +233,29 @@ const StudentHome = () => {
           <table className="w-full bg-white shadow-md border border-gray-300">
             <thead className="text-white">
               <tr>
-                <th className="p-3 border bg-orange-700">Course Code</th>
                 <th className="p-3 border bg-orange-700">Course Name</th>
                 <th className="p-3 border bg-orange-700">Date & Time</th>
                 <th className="p-3 border bg-orange-700">Location</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td colSpan="4" className="text-center py-4">Sample data</td>
-              </tr>
+              {timetable.length === 0 ? (
+                <tr><td colSpan="3" className="text-center py-4">No timetable available.</td></tr>
+              ) : (
+                timetable.map((entry, index) => (
+                  <tr key={index} className="hover:bg-orange-50">
+                    <td className="p-3 border text-center">{entry.eventName}</td>
+                    <td className="p-3 border text-center">
+                      {new Date(entry.date).toLocaleDateString()} at {entry.startTime}
+                    </td>
+                    <td className="p-3 border text-center">{entry.roomName}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       )}
-
 
       {selectedSection === "exam" && (
         <div className="px-10 py-5">
@@ -249,9 +271,7 @@ const StudentHome = () => {
             </thead>
             <tbody>
               {exams.length === 0 ? (
-                <tr>
-                  <td colSpan="4" className="text-center py-4">No exams scheduled.</td>
-                </tr>
+                <tr><td colSpan="4" className="text-center py-4">No exams scheduled.</td></tr>
               ) : (
                 exams.map((exam, index) => (
                   <tr key={index} className="hover:bg-orange-50">
@@ -267,8 +287,7 @@ const StudentHome = () => {
             </tbody>
           </table>
         </div>
-      )}``    
-      
+      )}
     </div>
   );
 };

@@ -93,14 +93,20 @@ const ViewAllStudents = () => {
   };
 
   const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.studentId.toLowerCase().includes(searchTerm.toLowerCase())
+    student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.phone?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.address?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedStudents = [...filteredStudents].sort((a, b) => {
-    const aVal = a[sortKey]?.toString().toLowerCase() || "";
-    const bVal = b[sortKey]?.toString().toLowerCase() || "";
+    let aVal = a[sortKey];
+    let bVal = b[sortKey];
+
+    aVal = aVal !== undefined && aVal !== null ? aVal.toString().toLowerCase() : "";
+    bVal = bVal !== undefined && bVal !== null ? bVal.toString().toLowerCase() : "";
+
     return sortOrder === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
   });
 
